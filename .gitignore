@@ -1,0 +1,9 @@
+*
+!*/
+!*.md
+!*.bat
+!*.cpp
+!*.hpp
+!*.json
+!*Makefile
+!.gitignore
