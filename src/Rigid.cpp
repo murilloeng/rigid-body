@@ -63,7 +63,7 @@ void Rigid::solve(void)
 				break;
 			}
 			//update
-			S = bp * m_J + gp * (m_w_new.spin() * m_J - (m_J * m_w_new).spin());
+			S = bp * m_J + gp * (m_w_new.spin() * m_J - (m_J * m_w_new).spin()) - m_q_new.conjugate().rotation() * m.spin() * m_p_new.rotation_gradient();
 			dp = S.inverse() * r;
 			m_p_new += dp;
 			m_w_new += gp * dp;
