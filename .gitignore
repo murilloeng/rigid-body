@@ -1,9 +1,11 @@
 *
 !*/
+!*.gp
 !*.md
 !*.bat
 !*.cpp
 !*.hpp
+!*.dat
 !*.json
 !*Makefile
 !.gitignore

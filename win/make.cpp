@@ -4,7 +4,11 @@
 void setup_dlls(Maker& maker)
 {
 	maker.m_path_dll.clear();
+	maker.m_path_dll.push_back(maker.m_edll + "libblas.dll");
 	maker.m_path_dll.push_back(maker.m_edll + "liblapack.dll");
+	maker.m_path_dll.push_back(maker.m_edll + "libgfortran-3.dll");
+	maker.m_path_dll.push_back(maker.m_edll + "libquadmath-0.dll");
+	maker.m_path_dll.push_back(maker.m_edll + "libgcc_s_sjlj-1.dll");
 }
 void setup_libs(Maker& maker)
 {
@@ -26,8 +30,10 @@ int main(int argc, char** argv)
 		setup_libs(maker);
 		setup_dlls(maker);
 		maker.build_src();
+		maker.build_dll();
 		maker.build_exe();
 		maker.build_run();
+		maker.build_debug();
 	}
 	if(maker.m_clean)
 	{
