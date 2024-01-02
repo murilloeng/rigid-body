@@ -14,7 +14,7 @@ void setup_libs(Maker& maker)
 {
 	maker.m_libs.clear();
 	maker.m_libs += maker.m_elib + "liblapack.lib ";
-	maker.m_libs += "../Math/dist/" + maker.m_mode + "/Math.lib ";
+	maker.m_libs += "../Math/dist/" + maker.m_mode + "/libmath.lib ";
 }
 int main(int argc, char** argv)
 {
@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 	maker.m_lib = true;
 	maker.m_out = "rigid";
 	maker.setup(argc, argv);
-	maker.m_incs += "/I ../Math/ ";
+	maker.m_incs += "/I .. /I ../Math/ ";
 	//build
 	if(!maker.m_clean)
 	{

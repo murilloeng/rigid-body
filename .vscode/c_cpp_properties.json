@@ -6,7 +6,8 @@
 			"includePath":
 			[
 				"${workspaceFolder}",
-				"${workspaceFolder}/../Math/"
+				"${workspaceFolder}/..",
+				"${workspaceFolder}/../Math"
 			],
 			"defines":
 			[
