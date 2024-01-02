@@ -1,4 +1,5 @@
 //std
+#include <cmath>
 #include <cstdio>
 
 //rigid
@@ -44,11 +45,23 @@ void pyramid_1(void)
 	pyramid.solve();
 	pyramid.finish();
 }
+void pyramid_2(void)
+{
+	Pyramid pyramid;
+	pyramid.m_steps = 10000;
+	pyramid.m_dt = 5.00e-02;
+	sprintf(pyramid.m_label, "pyramid_2");
+	math::quat(pyramid.m_state_old) = {1, 0, 0, 0};
+	math::vec3(pyramid.m_velocity_old) = {1e-5, 1, 0};
+	pyramid.setup();
+	pyramid.solve();
+	pyramid.finish();
+}
 
 int main(void)
 {
 	//test
-	pyramid_1();
+	pyramid_2();
 	//return
 	return 0;
 }

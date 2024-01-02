@@ -2,7 +2,7 @@
 #include "inc/Pyramid.hpp"
 
 //constructor
-Pyramid::Pyramid(void) : m_p(1.00e+03), m_a(1.00e+00), m_b(1.00e+00), m_h(1.00e+00)
+Pyramid::Pyramid(void) : m_p(1.00e+03), m_a(1.00e+00), m_b(2.00e+00), m_h(1.00e+00)
 {
 	return;
 }
