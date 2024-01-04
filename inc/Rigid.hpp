@@ -1,9 +1,15 @@
 #pragma once
 
+//std
+#include <functional>
+
 //math
 #include "Math/inc/linear/vec3.hpp"
 #include "Math/inc/linear/quat.hpp"
 #include "Math/inc/linear/mat3.hpp"
+
+//canvas
+#include "Canvas/lib/inc/Scene/Scene.hpp"
 
 class Rigid
 {
@@ -19,6 +25,10 @@ public:
 	void record(void);
 	void finish(void);
 	virtual void setup(void);
+
+	//results
+	void draw(unsigned) const;
+	virtual void draw_model(canvas::Scene*) const = 0;
 
 	//data
 	double m_M;
@@ -40,4 +50,7 @@ public:
 	double m_velocity_new[3];
 	double m_acceleration_old[3];
 	double m_acceleration_new[3];
+
+	std::function<math::vec3(double, math::quat)> m_me;
+	std::function<math::mat3(double, math::quat)> m_dme;
 };

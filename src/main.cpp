@@ -18,6 +18,7 @@ void sphere_1(void)
 	sphere.setup();
 	sphere.solve();
 	sphere.finish();
+	sphere.draw(10);
 }
 
 void cylinder_1(void)
@@ -31,6 +32,7 @@ void cylinder_1(void)
 	cylinder.setup();
 	cylinder.solve();
 	cylinder.finish();
+	cylinder.draw(10);
 }
 
 void pyramid_1(void)
@@ -44,6 +46,7 @@ void pyramid_1(void)
 	pyramid.setup();
 	pyramid.solve();
 	pyramid.finish();
+	pyramid.draw(10);
 }
 void pyramid_2(void)
 {
@@ -56,6 +59,7 @@ void pyramid_2(void)
 	pyramid.setup();
 	pyramid.solve();
 	pyramid.finish();
+	pyramid.draw(50);
 }
 
 int main(void)
