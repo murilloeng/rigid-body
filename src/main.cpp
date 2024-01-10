@@ -94,7 +94,7 @@ void pyramid_top(void)
 	//solve
 	sprintf(pyramid.m_label, "pyramid_top");
 	math::quat(pyramid.m_state_old) = {1, 0, 0, 0};
-	math::vec3(pyramid.m_velocity_old) = {1e-5 * wc, 0, 0.95 * wc};
+	math::vec3(pyramid.m_velocity_old) = {1e-5 * wc, 0, 0.99 * wc};
 	pyramid.m_me = [m, g, l](double, math::quat q)
 	{
 		const math::vec3 e3(0, 0, 1);
@@ -108,7 +108,8 @@ void pyramid_top(void)
 	pyramid.setup();
 	pyramid.solve();
 	pyramid.finish();
-	pyramid.draw(20);
+	pyramid.position({0, 0, -l});
+	pyramid.draw(100);
 }
 void pyramid_top_friction(void)
 {
@@ -166,7 +167,7 @@ void pyramid_top_friction(void)
 int main(void)
 {
 	//test
-	pyramid_top_friction();
+	pyramid_top();
 	//return
 	return 0;
 }

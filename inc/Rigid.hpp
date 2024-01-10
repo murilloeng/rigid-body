@@ -24,6 +24,7 @@ public:
 	void solve(void);
 	void record(void);
 	void finish(void);
+	void position(math::vec3);
 	virtual void setup(void);
 
 	//results

@@ -131,6 +131,27 @@ void Rigid::finish(void)
 		fclose(files[i]);
 	}
 }
+void Rigid::position(math::vec3 yp)
+{
+	//path
+	char path[200];
+	sprintf(path, "data/%s_position.txt", m_label);
+	//open
+	FILE* file = fopen(path, "w");
+	//write
+	for(unsigned j = 0; j < m_steps; j++)
+	{
+		fprintf(file, "%+.6e ", m_dt * j);
+		const math::vec3 xp = math::quat(m_state_data + 4 * j).rotate(yp);
+		for(unsigned k = 0; k < 3; k++)
+		{
+			fprintf(file, "%+.6e ", xp[k]);
+		}
+		fprintf(file, "\n");
+	}
+	//close
+	fclose(file);
+}
 
 //results
 void Rigid::draw(unsigned duration) const
