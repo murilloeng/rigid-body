@@ -66,10 +66,10 @@ void pyramid_top(void)
 	//data
 	Pyramid pyramid;
 	const unsigned nl = 200;
-	const double a = 1.00e+00;
-	const double b = 1.00e+00;
-	const double h = 1.00e+00;
-	const double p = 1.00e+00;
+	const double a = 1.00e-01;
+	const double b = 1.00e-01;
+	const double h = 1.00e-01;
+	const double p = 7.80e+03;
 	const double g = 9.81e+00;
 	const double l = 3 * h / 4;
 	const unsigned ns = 100000;
@@ -92,6 +92,7 @@ void pyramid_top(void)
 		return;
 	}
 	//solve
+	printf("wc: %+.6e\n", wc);
 	sprintf(pyramid.m_label, "pyramid_top");
 	math::quat(pyramid.m_state_old) = {1, 0, 0, 0};
 	math::vec3(pyramid.m_velocity_old) = {1e-5 * wc, 0, 0.99 * wc};
@@ -116,10 +117,10 @@ void pyramid_top_friction(void)
 	//data
 	Pyramid pyramid;
 	const unsigned nl = 200;
-	const double a = 1.00e+00;
-	const double b = 1.00e+00;
-	const double h = 1.00e+00;
-	const double p = 1.00e+00;
+	const double a = 1.00e-01;
+	const double b = 1.00e-01;
+	const double h = 1.00e-01;
+	const double p = 7.80e+03;
 	const double g = 9.81e+00;
 	const double u = 5.00e-01;
 	const double l = 3 * h / 4;
@@ -144,7 +145,7 @@ void pyramid_top_friction(void)
 	}
 	//solve
 	sprintf(pyramid.m_label, "pyramid_top_friction");
-	math::vec3(pyramid.m_velocity_old) = {1e-5 * wc, 0, 0.95 * wc};
+	math::vec3(pyramid.m_velocity_old) = {1e-5 * wc, 0, 1.01 * wc};
 	math::quat(pyramid.m_state_old) = {cos(atan(u) / 2), sin(atan(u) / 2), 0, 0};
 	pyramid.m_me = [m, g, l, u](double, math::quat q)
 	{
@@ -161,13 +162,14 @@ void pyramid_top_friction(void)
 	pyramid.setup();
 	pyramid.solve();
 	pyramid.finish();
-	pyramid.draw(50);
+	pyramid.position({0, 0, -l});
+	pyramid.draw(100);
 }
 
 int main(void)
 {
 	//test
-	pyramid_top();
+	pyramid_top_friction();
 	//return
 	return 0;
 }
