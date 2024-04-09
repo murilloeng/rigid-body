@@ -1,8 +1,8 @@
 //rigid
-#include "inc/Pyramid.hpp"
+#include "rigid-body/inc/Pyramid.hpp"
 
 //canvas
-#include "Canvas/lib/inc/Objects/2D/Triangle.hpp"
+#include "Canvas/inc/Objects/2D/Triangle.hpp"
 
 //constructor
 Pyramid::Pyramid(void) : m_p(1.00e+03), m_a(1.00e+00), m_b(2.00e+00), m_h(1.00e+00)

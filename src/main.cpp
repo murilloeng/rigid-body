@@ -3,9 +3,9 @@
 #include <cstdio>
 
 //rigid
-#include "inc/Sphere.hpp"
-#include "inc/Pyramid.hpp"
-#include "inc/Cylinder.hpp"
+#include "rigid-body/inc/Sphere.hpp"
+#include "rigid-body/inc/Pyramid.hpp"
+#include "rigid-body/inc/Cylinder.hpp"
 
 void sphere_uniform(void)
 {

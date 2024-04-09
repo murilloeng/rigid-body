@@ -22,8 +22,8 @@
 			"name": "Linux",
 			"includePath":
 			[
-				"${workspaceFolder}",
-				"${workspaceFolder}/../Math/inc"
+				"${workspaceFolder}/..",
+				"${workspaceFolder}/../external/cpp/inc"
 			],
 			"cStandard": "c17",
 			"cppStandard": "c++17",

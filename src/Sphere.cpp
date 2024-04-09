@@ -2,10 +2,10 @@
 #include <cmath>
 
 //rigid
-#include "inc/Sphere.hpp"
+#include "rigid-body/inc/Sphere.hpp"
 
 //canvas
-#include "Canvas/lib/inc/Objects/3D/Sphere.hpp"
+#include "Canvas/inc/Objects/3D/Sphere.hpp"
 
 //constructor
 Sphere::Sphere(void) : m_p(1.00e+03), m_r(1.00e+00)

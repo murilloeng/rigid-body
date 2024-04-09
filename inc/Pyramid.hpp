@@ -1,7 +1,7 @@
 #pragma once
 
 //rigid
-#include "inc/Rigid.hpp"
+#include "rigid-body/inc/Rigid.hpp"
 
 class Pyramid : public Rigid
 {

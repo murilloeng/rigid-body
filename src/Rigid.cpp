@@ -4,15 +4,15 @@
 #include <cstring>
 
 //canvas
-#include "Canvas/lib/inc/Managers/Glut.hpp"
-#include "Canvas/lib/inc/Objects/Object.hpp"
+#include "Canvas/inc/Windows/Glut.hpp"
+#include "Canvas/inc/Objects/Object.hpp"
 
 //rigid
-#include "inc/Rigid.hpp"
+#include "rigid-body/inc/Rigid.hpp"
 
 //constructor
 Rigid::Rigid(void) : 
-	m_energy_data(nullptr), m_state_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
+	m_state_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
 {
 	return;
 }
@@ -158,7 +158,7 @@ void Rigid::draw(unsigned duration) const
 {
 	//data
 	unsigned* step = new unsigned(0);
-	canvas::Glut* app = new canvas::Glut(0, nullptr, "../Canvas/lib/shd/");
+	canvas::windows::Glut* app = new canvas::windows::Glut(0, nullptr, "../Canvas/shd/");
 	//objects
 	draw_model(app->scene());
 	app->scene()->update(true);

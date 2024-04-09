@@ -2,10 +2,10 @@
 #include <cmath>
 
 //rigid
-#include "inc/Cylinder.hpp"
+#include "rigid-body/inc/Cylinder.hpp"
 
 //canvas
-#include "Canvas/lib/inc/Objects/3D/Cylinder.hpp"
+#include "Canvas/inc/Objects/3D/Cylinder.hpp"
 
 //constructor
 Cylinder::Cylinder(void) : m_p(1.00e+03), m_r(1.00e+00), m_h(1.00e+00)
