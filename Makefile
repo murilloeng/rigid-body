@@ -37,7 +37,13 @@ run : $(out)
 debug : 
 	@gdb $(out) -x gdb.txt
 
-$(out) : $(obj)
+math :
+	@cd ../Math && make -f Makefile m=$m
+
+canvas :
+	@cd ../Canvas && make -f Makefile m=$m
+
+$(out) : math canvas $(obj)
 	@echo 'executable($(mode)): $@'
 	@mkdir -p $(dir $@) && rm -rf $@
 	@$(CXX) -fopenmp -o $(out) $(obj) ../Math/dist/$(mode)/libmath.so ../Canvas/dist/$(mode)/libcanvas.so $(LIBS)
