@@ -25,13 +25,17 @@ public:
 	void record(void);
 	void finish(void);
 	void position(math::vec3);
+
 	virtual void setup(void);
+
+	bool stability_search(unsigned, double) const;
 
 	//results
 	void draw(unsigned) const;
 	virtual void draw_model(canvas::Scene*) const = 0;
 
 	//data
+	double m_l;
 	double m_M;
 	double m_dt;
 	math::mat3 m_J1;

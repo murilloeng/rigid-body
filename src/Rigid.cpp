@@ -1,4 +1,5 @@
 //std
+#include <cmath>
 #include <thread>
 #include <cstdio>
 #include <cstring>
@@ -151,6 +152,40 @@ void Rigid::position(math::vec3 yp)
 	}
 	//close
 	fclose(file);
+}
+
+bool Rigid::stability_search(unsigned index, double q) const
+{
+	//data
+	double a, b, c, d;
+	const double m = m_M;
+	const double l = m_l;
+	const double g = 9.81e+00;
+	const double J1 = m_J2[0];
+	const double J2 = m_J2[4];
+	const double J3 = m_J2[8];
+	const double Jp = index == 0 ? J2 : J1;
+	const double w3 = sqrt(m * g * l / cos(q) / (J3 - Jp));
+	//parameters
+	if(index == 0)
+	{
+		a = (J2 * J2 - (J1 - J3) * (J1 - J3)) / (J1 * J3);
+		c = -2 * (m * g * l) * (m * g * l) * (J1 - J2 - J3) / (J1 * J2 * J3);
+		b = (m * g * l) * (m * g * l) * (J1 * J1 - J2 * J2 - J3 * J3 + (J1 - J2) * J3) / (J1 * J2 * J3 * (J2 - J3));
+		d = (m * g * l) * (m * g * l) * (m * g * l) * (m * g * l) * (2 * J1 - 2 * J2 - J3) / (J1 * J2 * J3 * (J2 - J3) * (J2 - J3));
+	}
+	else
+	{
+		a = (J1 * J1 - (J2 - J3) * (J2 - J3)) / (J2 * J3);
+		c = -2 * (m * g * l) * (m * g * l) * (J2 - J1 - J3) / (J2 * J1 * J3);
+		b = (m * g * l) * (m * g * l) * (J2 * J2 - J1 * J1 - J3 * J3 + (J2 - J1) * J3) / (J2 * J1 * J3 * (J1 - J3));
+		d = (m * g * l) * (m * g * l) * (m * g * l) * (m * g * l) * (2 * J2 - 2 * J1 - J3) / (J2 * J1 * J3 * (J1 - J3) * (J1 - J3));
+	}
+	//return
+	const double w34 = w3 * w3 * w3 * w3;
+	return 
+		(a * w34 + b >= 0) && (c * w34 + d >= 0) &&
+		((a * w34 + b) * (a * w34 + b) - 4 * (c * w34 + d) >= 0);
 }
 
 //results

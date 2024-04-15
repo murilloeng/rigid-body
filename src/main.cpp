@@ -169,7 +169,68 @@ void pyramid_top_friction(void)
 int main(void)
 {
 	//test
-	pyramid_top_friction();
+	// Pyramid pyramid;
+	// pyramid.m_a = 1.00;
+	// pyramid.m_b = 1.00;
+	// const unsigned nq = 1000;
+	// const unsigned nh = 1000;
+	// FILE* file = fopen("test.txt", "w");
+	// for(unsigned i = 1; i < nh; i++)
+	// {
+	// 	double a = 0.5 + 0.5 * i / nh;
+	// 	pyramid.m_h = 2 * sqrt((2 * a - 1) / 3) * pyramid.m_a;
+	// 	pyramid.setup();
+	// 	for(unsigned j = 0; j < nq; j++)
+	// 	{
+	// 		const double q = M_PI_2 * j / nq;
+	// 		fprintf(file, "%+.2e %+.2e %d\n", a, q, pyramid.stability_search(0, q));
+	// 	}
+	// 	fprintf(file, "\n");
+	// }
+	// for(unsigned i = 1; i < nh; i++)
+	// {
+	// 	double a = 1.0 + 0.5 * i / nh;
+	// 	pyramid.m_h = 2 * sqrt((2 * a - 1) / 3) * pyramid.m_a;
+	// 	pyramid.setup();
+	// 	for(unsigned j = 0; j < nq; j++)
+	// 	{
+	// 		const double q = M_PI_2 * j / nq;
+	// 		fprintf(file, "%+.2e %+.2e %d\n", a, q, pyramid.stability_search(0, q));
+	// 	}
+	// 	fprintf(file, "\n");
+	// }
+	// fclose(file);
+
+	Cylinder cylinder;
+	cylinder.m_r = 1.00;
+	const unsigned nq = 1000;
+	const unsigned nh = 1000;
+	FILE* file = fopen("test.txt", "w");
+	for(unsigned i = 1; i < nh; i++)
+	{
+		double a = 0.5 + 0.5 * i / nh;
+		cylinder.m_h = sqrt(3 * (2 * a - 1)) * cylinder.m_r;
+		cylinder.setup();
+		for(unsigned j = 0; j < nq; j++)
+		{
+			const double q = M_PI_2 * j / nq;
+			fprintf(file, "%+.2e %+.2e %d\n", a, q, cylinder.stability_search(0, q));
+		}
+		fprintf(file, "\n");
+	}
+	for(unsigned i = 1; i < nh; i++)
+	{
+		double a = 1.0 + 0.5 * i / nh;
+		cylinder.m_h = sqrt(3 * (2 * a - 1)) * cylinder.m_r;
+		cylinder.setup();
+		for(unsigned j = 0; j < nq; j++)
+		{
+			const double q = M_PI_2 * j / nq;
+			fprintf(file, "%+.2e %+.2e %d\n", a, q, cylinder.stability_search(0, q));
+		}
+		fprintf(file, "\n");
+	}
+	fclose(file);
 	//return
 	return 0;
 }
