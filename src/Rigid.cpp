@@ -13,7 +13,7 @@
 
 //constructor
 Rigid::Rigid(void) : 
-	m_state_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
+	m_iteration_max(10), m_state_data(nullptr), m_energy_data(nullptr), m_velocity_data(nullptr), m_acceleration_data(nullptr)
 {
 	return;
 }
@@ -28,32 +28,19 @@ Rigid::~Rigid(void)
 }
 
 //solver
-void Rigid::setup(void)
-{
-	//delete
-	delete[] m_state_data;
-	delete[] m_energy_data;
-	delete[] m_velocity_data;
-	delete[] m_acceleration_data;
-	//allocate
-	m_state_data = new double[4 * (m_steps + 1)];
-	m_energy_data = new double[1 * (m_steps + 1)];
-	m_velocity_data = new double[3 * (m_steps + 1)];
-	m_acceleration_data = new double[3 * (m_steps + 1)];
-}
 void Rigid::solve(void)
 {
 	//data
 	const double b = 0.25;
 	const double g = 0.50;
 	math::vec3 v, r, dv, me;
-	math::mat3 M, C, K, S, dme;
+	math::mat3 M, C, K, S, Ke;
 	math::quat q_old(m_state_old), q_new(m_state_new);
 	math::vec3 w_old(m_velocity_old), w_new(m_velocity_new);
 	math::vec3 a_old(m_acceleration_old), a_new(m_acceleration_new);
 	//initial
 	me.zeros();
-	dme.zeros();
+	Ke.zeros();
 	if(m_me) me = m_me(0.0, q_old);
 	math::quat(m_state_data + 0) = q_old;
 	math::vec3(m_velocity_data + 0) = w_old;
@@ -68,12 +55,12 @@ void Rigid::solve(void)
 		w_new = w_old + m_dt * a_old;
 		v = m_dt * w_old + m_dt * m_dt / 2 * a_old;
 		//corrector
-		for(unsigned j = 0; j < 10; j++)
+		for(m_iteration = 0; m_iteration < m_iteration_max; m_iteration++)
 		{
 			//residue
 			q_new = q_old * v.quaternion();
 			if(m_me) me = m_me((m_step + 1) * m_dt, q_new);
-			if(m_me) dme = m_dme((m_step + 1) * m_dt, q_new);
+			if(m_me) Ke = m_Ke((m_step + 1) * m_dt, q_new);
 			r = m_J2 * a_new + w_new.cross(m_J2 * w_new) - q_new.conjugate(me);
 			//check
 			if(r.norm() < 1e-5)
@@ -84,7 +71,7 @@ void Rigid::solve(void)
 			//system
 			M = m_J2;
 			C = w_new.spin() * m_J2 - (m_J2 * w_new).spin();
-			K = -q_new.conjugate().rotation() * (me.spin() + dme);
+			K = -q_new.conjugate().rotation() * (me.spin() + Ke);
 			S = K * v.rotation_gradient() + M / b / m_dt / m_dt + g * C / b / m_dt;
 			//update
 			S.solve(dv, -r);
@@ -93,6 +80,19 @@ void Rigid::solve(void)
 			a_new += double(1) / b / m_dt / m_dt * dv;
 		}
 	}
+}
+void Rigid::setup(void)
+{
+	//delete
+	delete[] m_state_data;
+	delete[] m_energy_data;
+	delete[] m_velocity_data;
+	delete[] m_acceleration_data;
+	//allocate
+	m_state_data = new double[4 * (m_steps + 1)];
+	m_energy_data = new double[1 * (m_steps + 1)];
+	m_velocity_data = new double[3 * (m_steps + 1)];
+	m_acceleration_data = new double[3 * (m_steps + 1)];
 }
 void Rigid::record(void)
 {
@@ -131,61 +131,6 @@ void Rigid::finish(void)
 		}
 		fclose(files[i]);
 	}
-}
-void Rigid::position(math::vec3 yp)
-{
-	//path
-	char path[200];
-	sprintf(path, "data/%s_position.txt", m_label);
-	//open
-	FILE* file = fopen(path, "w");
-	//write
-	for(unsigned j = 0; j < m_steps; j++)
-	{
-		fprintf(file, "%+.6e ", m_dt * j);
-		const math::vec3 xp = math::quat(m_state_data + 4 * j).rotate(yp);
-		for(unsigned k = 0; k < 3; k++)
-		{
-			fprintf(file, "%+.6e ", xp[k]);
-		}
-		fprintf(file, "\n");
-	}
-	//close
-	fclose(file);
-}
-
-bool Rigid::stability_search(unsigned index, double q) const
-{
-	//data
-	double a, b, c, d;
-	const double m = m_M;
-	const double l = m_l;
-	const double g = 9.81e+00;
-	const double J1 = m_J2[0];
-	const double J2 = m_J2[4];
-	const double J3 = m_J2[8];
-	const double Jp = index == 0 ? J2 : J1;
-	const double w3 = sqrt(m * g * l / cos(q) / (J3 - Jp));
-	//parameters
-	if(index == 0)
-	{
-		a = (J2 * J2 - (J1 - J3) * (J1 - J3)) / (J1 * J3);
-		c = -2 * (m * g * l) * (m * g * l) * (J1 - J2 - J3) / (J1 * J2 * J3);
-		b = (m * g * l) * (m * g * l) * (J1 * J1 - J2 * J2 - J3 * J3 + (J1 - J2) * J3) / (J1 * J2 * J3 * (J2 - J3));
-		d = (m * g * l) * (m * g * l) * (m * g * l) * (m * g * l) * (2 * J1 - 2 * J2 - J3) / (J1 * J2 * J3 * (J2 - J3) * (J2 - J3));
-	}
-	else
-	{
-		a = (J1 * J1 - (J2 - J3) * (J2 - J3)) / (J2 * J3);
-		c = -2 * (m * g * l) * (m * g * l) * (J2 - J1 - J3) / (J2 * J1 * J3);
-		b = (m * g * l) * (m * g * l) * (J2 * J2 - J1 * J1 - J3 * J3 + (J2 - J1) * J3) / (J2 * J1 * J3 * (J1 - J3));
-		d = (m * g * l) * (m * g * l) * (m * g * l) * (m * g * l) * (2 * J2 - 2 * J1 - J3) / (J2 * J1 * J3 * (J1 - J3) * (J1 - J3));
-	}
-	//return
-	const double w34 = w3 * w3 * w3 * w3;
-	return 
-		(a * w34 + b >= 0) && (c * w34 + d >= 0) &&
-		((a * w34 + b) * (a * w34 + b) - 4 * (c * w34 + d) >= 0);
 }
 
 //results

@@ -1,9 +1,9 @@
 #pragma once
 
 //rigid
-#include "rigid-body/inc/Rigid.hpp"
+#include "rigid-body/inc/Top.hpp"
 
-class Pyramid : public Rigid
+class Pyramid : public Top
 {
 public:
 	//constructor

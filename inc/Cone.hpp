@@ -3,14 +3,14 @@
 //rigid
 #include "rigid-body/inc/Top.hpp"
 
-class Cylinder : public Top
+class Cone : public Top
 {
 public:
 	//constructor
-	Cylinder(void);
+	Cone(void);
 
 	//destructor
-	~Cylinder(void);
+	~Cone(void);
 
 	//solve
 	void setup(void) override;

@@ -7,20 +7,6 @@
 #include "rigid-body/inc/Pyramid.hpp"
 #include "rigid-body/inc/Cylinder.hpp"
 
-void sphere_uniform(void)
-{
-	Sphere sphere;
-	sphere.m_steps = 2000;
-	sphere.m_dt = 1.25e-02;
-	sprintf(sphere.m_label, "sphere_uniform");
-	math::quat(sphere.m_state_old) = {1, 0, 0, 0};
-	math::vec3(sphere.m_velocity_old) = {0, 0, 1};
-	sphere.setup();
-	sphere.solve();
-	sphere.finish();
-	sphere.draw(10);
-}
-
 void cylinder_uniform(void)
 {
 	Cylinder cylinder;
@@ -61,55 +47,50 @@ void pyramid_middle_axis(void)
 	pyramid.finish();
 	pyramid.draw(50);
 }
-void pyramid_top(void)
+void pyramid_vertical(void)
 {
 	//data
 	Pyramid pyramid;
-	const unsigned nl = 200;
+	const unsigned nl = 100;
+	const unsigned ns = 100;
 	const double a = 1.00e-01;
 	const double b = 1.00e-01;
 	const double h = 1.00e-01;
 	const double p = 7.80e+03;
 	const double g = 9.81e+00;
-	const double l = 3 * h / 4;
-	const unsigned ns = 100000;
-	const double m = p * a * b * h / 3;
-	const double J3 = m * (a * a + b * b) / 20;
-	const double J1 = m * (4 * b * b + 3 * h * h) / 80;
-	const double J2 = m * (4 * a * a + 3 * h * h) / 80;
-	const double wc = sqrt(m * g * l * (J1 + J2 + 2 * sqrt(J1 * J2)) / (J3 * J3 - (J1 - J2) * (J1 - J2)));
 	//pyramid
 	pyramid.m_a = a;
 	pyramid.m_b = b;
 	pyramid.m_h = h;
 	pyramid.m_p = p;
-	pyramid.m_steps = ns;
-	pyramid.m_dt = 2 * M_PI / wc * nl / ns;
-	//check
-	if(J3 < fabs(J1 - J2))
-	{
-		printf("No stable configuration exists!\n");
-		return;
-	}
+	pyramid.setup();
+	const double wc = pyramid.critical_velocity();
 	//solve
 	printf("wc: %+.6e\n", wc);
+	pyramid.m_steps = nl * ns;
+	pyramid.m_dt = 2 * M_PI / wc / ns;
 	sprintf(pyramid.m_label, "pyramid_top");
 	math::quat(pyramid.m_state_old) = {1, 0, 0, 0};
 	math::vec3(pyramid.m_velocity_old) = {1e-5 * wc, 0, 0.99 * wc};
-	pyramid.m_me = [m, g, l](double, math::quat q)
+	pyramid.m_me = [pyramid](double, math::quat q)
 	{
+		const double g = 9.81;
+		const double m = pyramid.m_M;
+		const double l = pyramid.m_l;
 		const math::vec3 e3(0, 0, 1);
 		return -m * g * l * q.rotate(e3).cross(e3);
 	};
-	pyramid.m_dme = [m, g, l](double, math::quat q)
+	pyramid.m_Ke = [pyramid](double, math::quat q)
 	{
+		const double g = 9.81;
+		const double m = pyramid.m_M;
+		const double l = pyramid.m_l;
 		const math::vec3 e3(0, 0, 1);
 		return -m * g * l * e3.spin() * q.rotate(e3).spin();
 	};
 	pyramid.setup();
 	pyramid.solve();
 	pyramid.finish();
-	pyramid.position({0, 0, -l});
 	pyramid.draw(100);
 }
 void pyramid_top_friction(void)
@@ -153,7 +134,7 @@ void pyramid_top_friction(void)
 		const math::vec3 e3(0, 0, 1);
 		return -m * g * l * q.rotate(e3).cross(e3 - u * e2);
 	};
-	pyramid.m_dme = [m, g, l, u](double, math::quat q)
+	pyramid.m_Ke = [m, g, l, u](double, math::quat q)
 	{
 		const math::vec3 e2(0, 1, 0);
 		const math::vec3 e3(0, 0, 1);
@@ -162,75 +143,12 @@ void pyramid_top_friction(void)
 	pyramid.setup();
 	pyramid.solve();
 	pyramid.finish();
-	pyramid.position({0, 0, -l});
 	pyramid.draw(100);
 }
 
 int main(void)
 {
 	//test
-	// Pyramid pyramid;
-	// pyramid.m_a = 1.00;
-	// pyramid.m_b = 1.00;
-	// const unsigned nq = 1000;
-	// const unsigned nh = 1000;
-	// FILE* file = fopen("test.txt", "w");
-	// for(unsigned i = 1; i < nh; i++)
-	// {
-	// 	double a = 0.5 + 0.5 * i / nh;
-	// 	pyramid.m_h = 2 * sqrt((2 * a - 1) / 3) * pyramid.m_a;
-	// 	pyramid.setup();
-	// 	for(unsigned j = 0; j < nq; j++)
-	// 	{
-	// 		const double q = M_PI_2 * j / nq;
-	// 		fprintf(file, "%+.2e %+.2e %d\n", a, q, pyramid.stability_search(0, q));
-	// 	}
-	// 	fprintf(file, "\n");
-	// }
-	// for(unsigned i = 1; i < nh; i++)
-	// {
-	// 	double a = 1.0 + 0.5 * i / nh;
-	// 	pyramid.m_h = 2 * sqrt((2 * a - 1) / 3) * pyramid.m_a;
-	// 	pyramid.setup();
-	// 	for(unsigned j = 0; j < nq; j++)
-	// 	{
-	// 		const double q = M_PI_2 * j / nq;
-	// 		fprintf(file, "%+.2e %+.2e %d\n", a, q, pyramid.stability_search(0, q));
-	// 	}
-	// 	fprintf(file, "\n");
-	// }
-	// fclose(file);
-
-	Cylinder cylinder;
-	cylinder.m_r = 1.00;
-	const unsigned nq = 1000;
-	const unsigned nh = 1000;
-	FILE* file = fopen("test.txt", "w");
-	for(unsigned i = 1; i < nh; i++)
-	{
-		double a = 0.5 + 0.5 * i / nh;
-		cylinder.m_h = sqrt(3 * (2 * a - 1)) * cylinder.m_r;
-		cylinder.setup();
-		for(unsigned j = 0; j < nq; j++)
-		{
-			const double q = M_PI_2 * j / nq;
-			fprintf(file, "%+.2e %+.2e %d\n", a, q, cylinder.stability_search(0, q));
-		}
-		fprintf(file, "\n");
-	}
-	for(unsigned i = 1; i < nh; i++)
-	{
-		double a = 1.0 + 0.5 * i / nh;
-		cylinder.m_h = sqrt(3 * (2 * a - 1)) * cylinder.m_r;
-		cylinder.setup();
-		for(unsigned j = 0; j < nq; j++)
-		{
-			const double q = M_PI_2 * j / nq;
-			fprintf(file, "%+.2e %+.2e %d\n", a, q, cylinder.stability_search(0, q));
-		}
-		fprintf(file, "\n");
-	}
-	fclose(file);
 	//return
 	return 0;
 }

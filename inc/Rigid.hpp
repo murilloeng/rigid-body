@@ -18,32 +18,29 @@ public:
 	Rigid(void);
 
 	//destructor
-	~Rigid(void);
+	virtual ~Rigid(void);
 
 	//solver
 	void solve(void);
-	void record(void);
-	void finish(void);
-	void position(math::vec3);
-
 	virtual void setup(void);
-
-	bool stability_search(unsigned, double) const;
+	virtual void record(void);
+	virtual void finish(void);
 
 	//results
 	void draw(unsigned) const;
 	virtual void draw_model(canvas::Scene*) const = 0;
 
 	//data
-	double m_l;
 	double m_M;
 	double m_dt;
 	math::mat3 m_J1;
 	math::mat3 m_J2;
 	unsigned m_step;
 	unsigned m_steps;
-	char m_label[200];
+	unsigned m_iteration;
+	unsigned m_iteration_max;
 
+	char m_label[200];
 	double* m_state_data;
 	double* m_energy_data;
 	double* m_velocity_data;
@@ -57,5 +54,5 @@ public:
 	double m_acceleration_new[3];
 
 	std::function<math::vec3(double, math::quat)> m_me;
-	std::function<math::mat3(double, math::quat)> m_dme;
+	std::function<math::mat3(double, math::quat)> m_Ke;
 };
