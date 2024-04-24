@@ -26,7 +26,7 @@ void Pyramid::setup(void)
 	m_J2(2, 2) = m_M * (m_a * m_a + m_b * m_b) / 20;
 	m_J2(0, 0) = m_M * (4 * m_b * m_b + 3 * m_h * m_h) / 80;
 	m_J2(1, 1) = m_M * (4 * m_a * m_a + 3 * m_h * m_h) / 80;
-	Rigid::setup();
+	Top::setup();
 }
 
 //results

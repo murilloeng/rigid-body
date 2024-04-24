@@ -26,7 +26,7 @@ void Sphere::setup(void)
 	m_J2.zeros();
 	m_M = 4 * M_PI * m_p * m_r * m_r * m_r / 3;
 	m_J2(0, 0) = m_J2(1, 1) = m_J2(2, 2) = 2 * m_M * m_r * m_r / 5;
-	Rigid::setup();
+	Top::setup();
 }
 
 //results

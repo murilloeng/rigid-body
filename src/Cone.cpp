@@ -1,3 +1,6 @@
+//std
+#include <cmath>
+
 //rigid
 #include "rigid-body/inc/Cone.hpp"
 
@@ -22,11 +25,11 @@ void Cone::setup(void)
 	m_J1.zeros();
 	m_J2.zeros();
 	m_l = 3 * m_h / 4;
-	m_M = m_p * m_r * m_r * m_h / 3;
-	m_J2(2, 2) = m_M * (m_r * m_r + m_r * m_r) / 20;
-	m_J2(0, 0) = m_M * (4 * m_r * m_r + 3 * m_h * m_h) / 80;
-	m_J2(1, 1) = m_M * (4 * m_r * m_r + 3 * m_h * m_h) / 80;
-	Rigid::setup();
+	m_M = M_PI * m_p * m_r * m_r * m_h / 3;
+	m_J2(2, 2) = 3 * m_M * m_r * m_r / 10;
+	m_J2(0, 0) = 3 * m_M * (4 * m_r * m_r + m_h * m_h) / 80;
+	m_J2(1, 1) = 3 * m_M * (4 * m_r * m_r + m_h * m_h) / 80;
+	Top::setup();
 }
 
 //results

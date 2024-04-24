@@ -16,7 +16,7 @@ public:
 	void setup(void) override;
 
 	//results
-	virtual void draw_model(canvas::Scene*) const override;
+	void draw_model(canvas::Scene*) const override;
 
 	//data
 	double m_p;
