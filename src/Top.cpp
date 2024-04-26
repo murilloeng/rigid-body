@@ -22,6 +22,20 @@ void Top::setup(void)
 	Rigid::setup();
 	delete[] m_position_data;
 	m_position_data = new double[3 * (m_steps + 1)];
+	m_me = [this](double t, math::quat q){
+		const double m = m_M;
+		const double l = m_l;
+		const double g = 9.81;
+		const math::vec3 e3(0, 0, 1);
+		return -m * g * l * q.rotate(e3).cross(e3);
+	};
+	m_Ke = [this](double t, math::quat q){
+		const double m = m_M;
+		const double l = m_l;
+		const double g = 9.81;
+		const math::vec3 e3(0, 0, 1);
+		return -m * g * l * e3.spin() * q.rotate(e3).spin();
+	};
 }
 void Top::record(void)
 {
@@ -66,16 +80,20 @@ double Top::critical_velocity(void) const
 }
 bool Top::stability_check(unsigned index, double tilt_angle) const
 {
-	//data
-	double a, b, c, d;
 	const double J1 = m_J2[0];
 	const double J2 = m_J2[4];
 	const double J3 = m_J2[8];
 	const double g1 = J1 / J3;
 	const double g2 = J2 / J3;
-	const double h1 = (J3 - J1) / J3;
-	const double h2 = (J3 - J2) / J3;
-	const double w3 = 1 / sqrt(cos(tilt_angle) * (index == 0 ? h2 : h1));
+	return stability_check(index, g1, g2, tilt_angle);
+}
+bool Top::stability_check(unsigned index, double g1, double g2, double bt)
+{
+	//data
+	double a, b, c, d;
+	const double h1 = 1 - g1;
+	const double h2 = 1 - g2;
+	const double w3 = 1 / sqrt(cos(bt) * (index == 0 ? h2 : h1));
 	//parameters
 	if(index == 0)
 	{

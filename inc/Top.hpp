@@ -20,6 +20,7 @@ public:
 	//stability
 	double critical_velocity(void) const;
 	bool stability_check(unsigned, double) const;
+	static bool stability_check(unsigned, double, double, double);
 
 	//data
 	double m_l;
