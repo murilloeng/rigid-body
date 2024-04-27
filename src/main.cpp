@@ -75,44 +75,54 @@ void pyramid_vertical(void)
 	pyramid.finish();
 	pyramid.draw(10);
 }
-void pyramid_tilted(void)
+void pyramid_tilted(unsigned index, double g1, double g2, double qt)
 {
 	//data
-	// Pyramid pyramid;
-	// const unsigned nl = 200;
-	// const unsigned ns = 100;
-	// const double h = 1.00e-01;
-	// const double p = 7.80e+03;
-	// const double g1 = 6.00e-01;
-	// const double g2 = 6.00e-01;
-	// const double a = sqrt(3) / 2 * h * sqrt(1 + g2 - g1) / sqrt(g1 + g2 - 1);
-	// const double b = sqrt(3) / 2 * h * sqrt(1 + g1 - g2) / sqrt(g1 + g2 - 1);
-	// //pyramid
-	// pyramid.m_a = a;
-	// pyramid.m_b = b;
-	// pyramid.m_h = h;
-	// pyramid.m_p = p;
-	// pyramid.setup();
-	// printf("J1: %+.2e\n", pyramid.m_J2(0, 0));
-	// printf("J2: %+.2e\n", pyramid.m_J2(1, 1));
-	// printf("J3: %+.2e\n", pyramid.m_J2(2, 2));
-	// printf("g1: %+.2e\n", pyramid.m_J2(0, 0) / pyramid.m_J2(2, 2));
-	// printf("g2: %+.2e\n", pyramid.m_J2(1, 1) / pyramid.m_J2(2, 2));
-
-	const double g1 = 0.60;
-	const double g2 = 0.60;
-	const unsigned ns = 150;
-	for(unsigned i = 0; i <= ns; i++)
+	Pyramid pyramid;
+	const unsigned nl = 200;
+	const unsigned ns = 100;
+	const double h = 1.00e-01;
+	const double p = 7.80e+03;
+	const double g = 9.81e+00;
+	const double a = sqrt(3) / 2 * h * sqrt(g2 - g1 + 1) / sqrt(g1 + g2 - 1);
+	const double b = sqrt(3) / 2 * h * sqrt(g1 - g2 + 1) / sqrt(g1 + g2 - 1);
+	//check
+	if(g1 + g2 < 1 || fabs(g1 - g2) > 1)
 	{
-		const double bt = 1.5 * i / ns;
-		printf("%+.2e %d\n", bt, Top::stability_check(1, g1, g2, bt));
+		fprintf(stderr, "Tilted top: Incorrect input arguments\n");
+		exit(EXIT_FAILURE);
 	}
+	//pyramid
+	pyramid.m_a = a;
+	pyramid.m_b = b;
+	pyramid.m_h = h;
+	pyramid.m_p = p;
+	pyramid.setup();
+	const double m = pyramid.m_M;
+	const double l = pyramid.m_l;
+	const double J1 = pyramid.m_J2(0, 0);
+	const double J2 = pyramid.m_J2(1, 1);
+	const double J3 = pyramid.m_J2(2, 2);
+	const double Jp = index == 0 ? J2 : J1;
+	const double wr = sqrt(m * g * l / J3);
+	const double w0 = sqrt(m * g * l / cos(qt) / (J3 - Jp));
+	//solve
+	pyramid.m_steps = nl * ns;
+	pyramid.m_dt = 2 * M_PI / wr / ns;
+	sprintf(pyramid.m_label, "pyramid_tilted");
+	fprintf(stdout, "System stability: %s\n", Top::stability_check(index, g1, g2, qt) ? "ok" : "not ok");
+	math::quat(pyramid.m_state_old) = {cos(qt / 2), (index == 0) * sin(qt / 2), (index == 1) * sin(qt / 2), 0};
+	math::vec3(pyramid.m_velocity_old) = {(index == 0) * w0 * sin(qt), (index == 1) * w0 * sin(qt), w0 * cos(qt)};
+	pyramid.setup();
+	pyramid.solve();
+	pyramid.finish();
+	pyramid.draw(10);
 }
 
 int main(void)
 {
 	//test
-	pyramid_tilted();
+	pyramid_tilted(0, 0.75, 0.75, M_PI / 20);
 	//return
 	return 0;
 }
