@@ -78,6 +78,16 @@ double Top::critical_velocity(void) const
 	//return
 	return wr * (sqrt(g1) + sqrt(g2)) / sqrt(1 - pow(g2 - g1, 2));
 }
+double Top::reference_velocity(void) const
+{
+	//data
+	const double m = m_M;
+	const double l = m_l;
+	const double g = 9.81e+00;
+	const double J3 = m_J2[8];
+	//return
+	return sqrt(m * g * l / J3);
+}
 bool Top::stability_check(unsigned index, double tilt_angle) const
 {
 	const double J1 = m_J2[0];
