@@ -36,6 +36,7 @@ void Top::setup(void)
 		const math::vec3 e3(0, 0, 1);
 		return -m * g * l * e3.spin() * q.rotate(e3).spin();
 	};
+	math::vec3(m_position_data + 0) = math::quat(m_state_old).rotate({0, 0, -m_l});
 }
 void Top::record(void)
 {
@@ -47,7 +48,7 @@ void Top::finish(void)
 	//data
 	char path[200];
 	Rigid::finish();
-	sprintf(path, "data/%s_position.txt", m_label);
+	sprintf(path, "data/%s_position.dat", m_label);
 	//write
 	FILE* file = fopen(path, "w");
 	for(unsigned j = 0; j < m_steps; j++)
@@ -63,21 +64,6 @@ void Top::finish(void)
 }
 
 //stability
-double Top::critical_velocity(void) const
-{
-	//data
-	const double m = m_M;
-	const double l = m_l;
-	const double g = 9.81e+00;
-	const double J1 = m_J2[0];
-	const double J2 = m_J2[4];
-	const double J3 = m_J2[8];
-	const double g1 = J1 / J3;
-	const double g2 = J2 / J3;
-	const double wr = sqrt(m * g * l / J3);
-	//return
-	return wr * (sqrt(g1) + sqrt(g2)) / sqrt(1 - pow(g2 - g1, 2));
-}
 double Top::reference_velocity(void) const
 {
 	//data
@@ -88,6 +74,33 @@ double Top::reference_velocity(void) const
 	//return
 	return sqrt(m * g * l / J3);
 }
+
+double Top::critical_velocity(void) const
+{
+	//data
+	const double J1 = m_J2[0];
+	const double J2 = m_J2[4];
+	const double J3 = m_J2[8];
+	const double g1 = J1 / J3;
+	const double g2 = J2 / J3;
+	const double wr = reference_velocity();
+	//return
+	return wr * (sqrt(g1) + sqrt(g2)) / sqrt(1 - pow(g2 - g1, 2));
+}
+double Top::critical_velocity(unsigned index) const
+{
+	//data
+	const double J1 = m_J2[0];
+	const double J2 = m_J2[4];
+	const double J3 = m_J2[8];
+	const double g1 = J1 / J3;
+	const double g2 = J2 / J3;
+	const double gp = index == 0 ? g2 : g1;
+	const double wr = reference_velocity();
+	//return
+	return wr / sqrt(1 - gp);
+}
+
 bool Top::stability_check(unsigned index, double tilt_angle) const
 {
 	const double J1 = m_J2[0];

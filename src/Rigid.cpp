@@ -117,7 +117,7 @@ void Rigid::finish(void)
 	for(unsigned i = 0; i < 4; i++)
 	{
 		//path
-		sprintf(paths[i], "data/%s_%s.txt", m_label, type[i]);
+		sprintf(paths[i], "data/%s_%s.dat", m_label, type[i]);
 		//write
 		files[i] = fopen(paths[i], "w");
 		for(unsigned j = 0; j < m_steps; j++)

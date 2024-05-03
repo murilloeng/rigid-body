@@ -6,7 +6,6 @@
 !*.bat
 !*.cpp
 !*.hpp
-!*.dat
 !*.json
 !*Makefile
 !.gitignore

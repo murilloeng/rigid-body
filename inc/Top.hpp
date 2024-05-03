@@ -18,8 +18,11 @@ public:
 	void finish(void) override;
 
 	//stability
-	double critical_velocity(void) const;
 	double reference_velocity(void) const;
+
+	double critical_velocity(void) const;
+	double critical_velocity(unsigned) const;
+
 	bool stability_check(unsigned, double) const;
 	static bool stability_check(unsigned, double, double, double);
 
