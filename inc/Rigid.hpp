@@ -26,6 +26,11 @@ public:
 	virtual void record(void);
 	virtual void finish(void);
 
+	//analysis
+	math::mat3 inertia(void) const;
+	math::mat3 damping(void) const;
+	math::mat3 stiffness(void) const;
+
 	//results
 	void draw(unsigned) const;
 	virtual void draw_model(canvas::Scene*) const = 0;

@@ -83,10 +83,10 @@ void top_tilted(unsigned index, double g1, double g2, double qt)
 int main(void)
 {
 	//test
-	const double g1 = 1.20;
-	const double g2 = 1.60;
+	const double g1 = 0.80;
+	const double g2 = 1.20;
 	top_vertical(1, 0.10, g1, g2, 1.01);
-	top_vertical(1, 0.10, g1, g2, 0.89);
+	top_vertical(1, 0.10, g1, g2, 0.85);
 	//return
 	return 0;
 }

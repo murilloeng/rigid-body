@@ -27,14 +27,14 @@ void Top::setup(void)
 		const double l = m_l;
 		const double g = 9.81;
 		const math::vec3 e3(0, 0, 1);
-		return -m * g * l * q.rotate(e3).cross(e3);
+		return -m * g * l * e3.spin() * q.conjugate(e3);
 	};
 	m_Ke = [this](double t, math::quat q){
 		const double m = m_M;
 		const double l = m_l;
 		const double g = 9.81;
 		const math::vec3 e3(0, 0, 1);
-		return -m * g * l * e3.spin() * q.rotate(e3).spin();
+		return -m * g * l * e3.spin() * q.conjugate(e3).spin();
 	};
 	math::vec3(m_position_data + 0) = math::quat(m_state_old).rotate({0, 0, -m_l});
 }
