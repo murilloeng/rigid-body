@@ -27,7 +27,7 @@ void Top::setup(void)
 		const double l = m_l;
 		const double g = 9.81;
 		const math::vec3 e3(0, 0, 1);
-		return -m * g * l * e3.spin() * q.conjugate(e3);
+		return -m * g * l * e3.cross(q.conjugate(e3));
 	};
 	m_Ke = [this](double t, math::quat q){
 		const double m = m_M;
@@ -137,4 +137,33 @@ bool Top::stability_check(unsigned index, double g1, double g2, double bt)
 	return 
 		(a * pow(w3, 4) + b >= 0) && (c * pow(w3, 4) + d >= 0) &&
 		(pow(a * pow(w3, 4) + b, 2) - 4 * (c * pow(w3, 4) + d) >= 0);
+}
+
+bool Top::stability_check_vertical(double w3) const
+{
+	//data
+	const double m = m_M;
+	const double l = m_l;
+	const double g = 9.81;
+	const double J1 = m_J2[0];
+	const double J2 = m_J2[4];
+	const double J3 = m_J2[8];
+	const double g1 = J1 / J3;
+	const double g2 = J2 / J3;
+	const double wr = sqrt(m * g * l / J3);
+	//return
+	return stability_check_vertical(g1, g2, w3 / wr);
+}
+bool Top::stability_check_vertical(double g1, double g2, double wp)
+{
+	//data
+	const double e = 1 / (g1 * g2);
+	const double b = (g1 + g2) / (g1 * g2);
+	const double d = (g1 + g2 - 2) / (g1 * g2);
+	const double c = (g1 * g2 - g1 - g2 + 1) / (g1 * g2);
+	const double a = (2 * g1 * g2 - g1 - g2 + 1) / (g1 * g2);
+	//return
+	const double B = a * wp * wp - b;
+	const double C = c * wp * wp * wp * wp + d * wp * wp + e;
+	return abs(g1 - g2) < 1 && g1 + g2 > 1 && B > 0 && C > 0 && B * B - 4 * C > 0;
 }

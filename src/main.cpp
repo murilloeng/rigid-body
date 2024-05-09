@@ -5,7 +5,7 @@
 //rigid
 #include "rigid-body/inc/Pyramid.hpp"
 
-void top_vertical(unsigned index, double h, double g1, double g2, double sf)
+void top_vertical(unsigned index, double h, double g1, double g2, double wp, const char* label)
 {
 	//data
 	Pyramid top;
@@ -27,14 +27,13 @@ void top_vertical(unsigned index, double h, double g1, double g2, double sf)
 	top.m_h = h;
 	top.m_p = p;
 	top.setup();
-	const double wc = top.critical_velocity();
-	printf("%.3e %.3e %.3e\n", top.critical_velocity(), top.critical_velocity(0), top.critical_velocity(1));
-	sprintf(top.m_label, "top_vertical_%d", sf > 1 ? 1 : 2);
+	sprintf(top.m_label, label);
+	const double wr = top.reference_velocity();
 	//setup
 	top.m_steps = nl * ns;
-	top.m_dt = 2 * M_PI / wc / ns;
+	top.m_dt = 2 * M_PI / wr / ns;
 	math::quat(top.m_state_old) = {1, 0, 0, 0};
-	math::vec3(top.m_velocity_old) = {e * (index == 0) * wc, e * (index == 1) * wc, sf * wc};
+	math::vec3(top.m_velocity_old) = {e * (index == 0) * wr, e * (index == 1) * wr, wp * wr};
 	//solve
 	top.setup();
 	top.solve();
@@ -85,8 +84,10 @@ int main(void)
 	//test
 	const double g1 = 0.80;
 	const double g2 = 1.20;
-	top_vertical(1, 0.10, g1, g2, 1.01);
-	top_vertical(1, 0.10, g1, g2, 0.85);
+	const double w1 = 1.90684;
+	const double w2 = 2.23604;
+	top_vertical(1, 0.10, g1, g2, 1.01 * w1, "top_vertical_1");
+	top_vertical(1, 0.10, g1, g2, 0.99 * w1, "top_vertical_2");
 	//return
 	return 0;
 }

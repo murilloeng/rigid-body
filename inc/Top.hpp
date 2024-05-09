@@ -26,6 +26,9 @@ public:
 	bool stability_check(unsigned, double) const;
 	static bool stability_check(unsigned, double, double, double);
 
+	bool stability_check_vertical(double) const;
+	static bool stability_check_vertical(double, double, double);
+
 	//data
 	double m_l;
 	double* m_position_data;
