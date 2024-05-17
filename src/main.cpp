@@ -6,6 +6,17 @@
 #include "rigid-body/inc/Plotter.hpp"
 #include "rigid-body/inc/Pyramid.hpp"
 
+void domains_vertical(void)
+{
+	Plotter plotter;
+	plotter.m_x1_min = 0;
+	plotter.m_x1_max = 2;
+	plotter.m_x2_min = 0;
+	plotter.m_x2_max = 2;
+	plotter.m_x3_min = 0;
+	plotter.m_x3_max = 5;
+	plotter.plot();
+}
 void top_vertical(unsigned index, double h, double g1, double g2, double wp, const char* label)
 {
 	//data
@@ -83,8 +94,7 @@ void top_tilted(unsigned index, double g1, double g2, double qt)
 int main(void)
 {
 	//test
-	Plotter plotter;
-	plotter.plot();
+	domains_vertical();
 	// const double g1 = 0.80;
 	// const double g2 = 1.20;
 	// const double w1 = 1.90684;
