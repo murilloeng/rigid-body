@@ -3,6 +3,7 @@
 #include <cstdio>
 
 //rigid
+#include "rigid-body/inc/Plotter.hpp"
 #include "rigid-body/inc/Pyramid.hpp"
 
 void top_vertical(unsigned index, double h, double g1, double g2, double wp, const char* label)
@@ -82,12 +83,14 @@ void top_tilted(unsigned index, double g1, double g2, double qt)
 int main(void)
 {
 	//test
-	const double g1 = 0.80;
-	const double g2 = 1.20;
-	const double w1 = 1.90684;
-	const double w2 = 2.23604;
-	top_vertical(1, 0.10, g1, g2, 1.01 * w1, "top_vertical_1");
-	top_vertical(1, 0.10, g1, g2, 0.99 * w1, "top_vertical_2");
+	Plotter plotter;
+	plotter.plot();
+	// const double g1 = 0.80;
+	// const double g2 = 1.20;
+	// const double w1 = 1.90684;
+	// const double w2 = 2.23604;
+	// top_vertical(1, 0.10, g1, g2, 1.01 * w1, "top_vertical_1");
+	// top_vertical(1, 0.10, g1, g2, 0.99 * w1, "top_vertical_2");
 	//return
 	return 0;
 }
