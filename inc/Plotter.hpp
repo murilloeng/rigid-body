@@ -18,6 +18,7 @@ public:
 	void setup(void);
 	void setup_data(void);
 	void setup_buffers(void);
+	void setup_uniforms(void);
 	static void setup_shader(GLuint, GLenum, const char*);
 	static void setup_program(GLuint&, const char*, const char*);
 
@@ -42,6 +43,8 @@ public:
 	float m_x3_min;
 	float m_x3_max;
 	unsigned m_frame;
+	unsigned m_marks;
+	unsigned m_frames;
 	GLuint m_vao_id_plot;
 	GLuint m_vbo_id_plot;
 	GLuint m_ibo_id_plot;
