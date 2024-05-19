@@ -4,6 +4,7 @@ uniform uint width;
 uniform uint height;
 
 uniform float time;
+uniform float offset;
 uniform float x1_min;
 uniform float x1_max;
 uniform float x2_min;
@@ -13,7 +14,7 @@ uniform float x3_max;
 
 out vec4 fragment_color;
 
-const vec3 color_null = vec3(0.2);
+const vec3 color_null = vec3(0.8);
 
 vec3 vertical(float g1, float g2, float wp)
 {
@@ -54,8 +55,12 @@ vec3 tilted_1(float g1, float g2, float wp)
 
 void main(void)
 {
+	uint w = width;
+	uint h = height;
+	float s = 1 - offset;
+	float d = offset / 2;
 	float x3 = (x3_max - x3_min) * time + x3_min;
-	float x1 = (x1_max - x1_min) * gl_FragCoord.x / width + x1_min;
-	float x2 = (x2_max - x2_min) * gl_FragCoord.y / height + x2_min;
+	float x1 = (x1_max - x1_min) / s * (gl_FragCoord.x / w - d) + x1_min;
+	float x2 = (x2_max - x2_min) / s * (gl_FragCoord.y / h - d) + x2_min;
 	fragment_color = vec4(vertical(x1, x2, x3), 1);
 }

@@ -8,8 +8,9 @@
 //rigid
 #include "rigid-body/inc/Plotter.hpp"
 
+
 //constructor
-Plotter::Plotter(void) : m_frame(0), m_marks(10), m_frames(200)
+Plotter::Plotter(void) : m_frame(0), m_marks(9), m_frames(200)
 {
 	m_master = this;
 }
@@ -48,23 +49,24 @@ void Plotter::setup(void)
 void Plotter::setup_data(void)
 {
 	//data
+	const float ms = m_offset / 2;
+	const float ps = 1 - m_offset;
 	unsigned ibo_data_mark[8 * (1 + m_marks)];
 	float vbo_data_mark[8 * (1 + 2 * m_marks)];
 	const unsigned ibo_data_plot[] = {0, 1, 2, 0, 2, 3};
-	const float vbo_data_plot[] = {-1, -1, +1, -1, +1, +1, -1, +1};
+	const float vbo_data_plot[] = {-ps, -ps, +ps, -ps, +ps, +ps, -ps, +ps};
 	//plot
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_plot);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_plot);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data_plot), vbo_data_plot, GL_DYNAMIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data_plot), ibo_data_plot, GL_DYNAMIC_DRAW);
 	//mark
-	const float s = 0.05;
 	for(unsigned i = 0; i < 4; i++)
 	{
 		ibo_data_mark[2 * i + 0] = (i + 0) % 4;
 		ibo_data_mark[2 * i + 1] = (i + 1) % 4;
-		vbo_data_mark[2 * i + 0] = i == 0 || i == 3 ? -1 : +1;
-		vbo_data_mark[2 * i + 1] = i == 0 || i == 1 ? -1 : +1;
+		vbo_data_mark[2 * i + 0] = i == 0 || i == 3 ? -ps : +ps;
+		vbo_data_mark[2 * i + 1] = i == 0 || i == 1 ? -ps : +ps;
 	}
 	for(unsigned i = 0; i < m_marks; i++)
 	{
@@ -76,22 +78,22 @@ void Plotter::setup_data(void)
 		ibo_data_mark[2 * (i + 2 * m_marks + 4) + 1] = i + 5 * m_marks + 4;
 		ibo_data_mark[2 * (i + 3 * m_marks + 4) + 0] = i + 6 * m_marks + 4;
 		ibo_data_mark[2 * (i + 3 * m_marks + 4) + 1] = i + 7 * m_marks + 4;
-		vbo_data_mark[2 * (i + 0 * m_marks + 4) + 1] = -1;
-		vbo_data_mark[2 * (i + 2 * m_marks + 4) + 0] = +1;
-		vbo_data_mark[2 * (i + 4 * m_marks + 4) + 1] = +1;
-		vbo_data_mark[2 * (i + 6 * m_marks + 4) + 0] = -1;
-		vbo_data_mark[2 * (i + 1 * m_marks + 4) + 1] = -1 + s;
-		vbo_data_mark[2 * (i + 3 * m_marks + 4) + 0] = +1 - s;
-		vbo_data_mark[2 * (i + 5 * m_marks + 4) + 1] = +1 - s;
-		vbo_data_mark[2 * (i + 7 * m_marks + 4) + 0] = -1 + s;
-		vbo_data_mark[2 * (i + 0 * m_marks + 4) + 0] = 2 * float(i + 1) / (m_marks + 1) - 1;
-		vbo_data_mark[2 * (i + 1 * m_marks + 4) + 0] = 2 * float(i + 1) / (m_marks + 1) - 1;
-		vbo_data_mark[2 * (i + 2 * m_marks + 4) + 1] = 2 * float(i + 1) / (m_marks + 1) - 1;
-		vbo_data_mark[2 * (i + 3 * m_marks + 4) + 1] = 2 * float(i + 1) / (m_marks + 1) - 1;
-		vbo_data_mark[2 * (i + 4 * m_marks + 4) + 0] = 1 - 2 * float(i + 1) / (m_marks + 1);
-		vbo_data_mark[2 * (i + 5 * m_marks + 4) + 0] = 1 - 2 * float(i + 1) / (m_marks + 1);
-		vbo_data_mark[2 * (i + 6 * m_marks + 4) + 1] = 1 - 2 * float(i + 1) / (m_marks + 1);
-		vbo_data_mark[2 * (i + 7 * m_marks + 4) + 1] = 1 - 2 * float(i + 1) / (m_marks + 1);
+		vbo_data_mark[2 * (i + 0 * m_marks + 4) + 1] = -ps;
+		vbo_data_mark[2 * (i + 2 * m_marks + 4) + 0] = +ps;
+		vbo_data_mark[2 * (i + 4 * m_marks + 4) + 1] = +ps;
+		vbo_data_mark[2 * (i + 6 * m_marks + 4) + 0] = -ps;
+		vbo_data_mark[2 * (i + 1 * m_marks + 4) + 1] = -ps + ms;
+		vbo_data_mark[2 * (i + 3 * m_marks + 4) + 0] = +ps - ms;
+		vbo_data_mark[2 * (i + 5 * m_marks + 4) + 1] = +ps - ms;
+		vbo_data_mark[2 * (i + 7 * m_marks + 4) + 0] = -ps + ms;
+		vbo_data_mark[2 * (i + 0 * m_marks + 4) + 0] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data_mark[2 * (i + 1 * m_marks + 4) + 0] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data_mark[2 * (i + 2 * m_marks + 4) + 1] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data_mark[2 * (i + 3 * m_marks + 4) + 1] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data_mark[2 * (i + 4 * m_marks + 4) + 0] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+		vbo_data_mark[2 * (i + 5 * m_marks + 4) + 0] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+		vbo_data_mark[2 * (i + 6 * m_marks + 4) + 1] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+		vbo_data_mark[2 * (i + 7 * m_marks + 4) + 1] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_mark);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_mark);
@@ -137,6 +139,7 @@ void Plotter::setup_uniforms(void)
 {
 	glUseProgram(m_program_id_plot);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "time"), 0);
+	glUniform1f(glGetUniformLocation(m_program_id_plot, "offset"), m_offset);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x1_min"), m_x1_min);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x1_max"), m_x1_max);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x2_min"), m_x2_min);
@@ -303,3 +306,4 @@ void Plotter::callback_keyboard(unsigned char key, int, int)
 
 //static data
 Plotter* Plotter::m_master = nullptr;
+const float Plotter::m_offset = 0.10f;

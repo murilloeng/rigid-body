@@ -58,5 +58,6 @@ public:
 	GLuint m_program_id_text;
 	GLuint m_program_id_mark;
 	static Plotter* m_master;
+	const static float m_offset;
 	std::function<bool(double, double, double)> m_function;
 };
