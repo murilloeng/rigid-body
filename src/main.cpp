@@ -10,9 +10,9 @@ void domains_vertical(void)
 {
 	Plotter plotter;
 	plotter.m_x1_min = 0;
-	plotter.m_x1_max = 2;
+	plotter.m_x1_max = 5;
 	plotter.m_x2_min = 0;
-	plotter.m_x2_max = 2;
+	plotter.m_x2_max = 5;
 	plotter.m_x3_min = 0;
 	plotter.m_x3_max = 5;
 	plotter.plot();
