@@ -23,6 +23,22 @@ struct interval
 	float m_max;
 };
 const interval empty = interval(0, 0);
+bool check_inside(interval i, float v)
+{
+	return v > i.m_min && v < i.m_max;
+}
+bool iunion(inout interval i1, inout interval i2)
+{
+	bool test_1 = check_inside(i1, i2.m_min);
+	bool test_2 = check_inside(i1, i2.m_max);
+	if(i1 != empty && i2 != empty && (test_1 || test_2))
+	{
+		i2 = empty;
+		i1 = interval(min(i1.m_min, i2.m_min), max(i1.m_max, i2.m_max));
+		return true;
+	}
+	return false;
+}
 interval intersection(interval i1, interval i2)
 {
 	if(i1 == empty || i2 == empty || i1.m_max < i2.m_min || i2.m_max < i1.m_min)
@@ -32,37 +48,6 @@ interval intersection(interval i1, interval i2)
 	else
 	{
 		return interval(max(i1.m_min, i2.m_min), min(i1.m_max, i2.m_max));
-	}
-}
-bool iunion(interval i1, interval i2, inout interval iu)
-{
-	if(i1 == empty){iu = i2; return true;}
-	if(i2 == empty){iu = i1; return true;}
-	if(i2.m_min < i1.m_max || i1.m_min < i2.m_max){iu = interval(min(i1.m_min, i2.m_min), max(i1.m_max, i2.m_max)); return true;}
-	return false;
-}
-bool combine_iteration(inout interval[4] set, inout bool[4] flags)
-{
-	interval iu;
-	for(uint i = 0; i < 4; i++)
-	{
-		for(uint j = 0; j < 4; j++)
-		{
-			if(i != j && flags[j] && iunion(set[i], set[j], iu))
-			{
-				set[i] = iu;
-				flags[j] = false;
-				return true;
-			}
-		}
-	}
-	return false;
-}
-void combine(inout interval[4] set, inout bool[4] flags)
-{
-	while(combine_iteration(set, flags))
-	{
-
 	}
 }
 
@@ -124,7 +109,7 @@ vec3 vertical_limit(float g1, float g2)
 	}
 	if(c < 0 && d1 < 0) i1 = empty, i2 = empty;
 	if(c > 0 && d1 < 0) i1 = interval(0, inf), i2 = empty;
-	//condition 3
+	//test 3
 	interval i3, i4;
 	float p1 = a * a - 4 * c;
 	float p3 = b * b - 4 * e;
@@ -155,18 +140,21 @@ vec3 vertical_limit(float g1, float g2)
 		intersection(intersection(i0, i2), i3),
 		intersection(intersection(i0, i2), i4)
 	};
-	if(set[0] == empty && set[1] == empty && set[2] == empty && set[3] == empty)
+	while(true)
 	{
-		return vec3(1, 0, 0);
-	}
-	for(uint i = 0; i < 4; i++)
-	{
-		if(set[i] != empty && set[i].m_max != inf)
+		bool test = false;
+		for(uint i = 0; i < 4; i++)
 		{
-			return vec3(0, 1, 0);
+			for(uint j = i + 1; j < 4; j++)
+			{
+				test = test || iunion(set[i], set[j]);
+			}
 		}
+		if(!test) break;
 	}
-	return vec3(0, 0, 1);
+	uint count = 0;
+	for(uint i = 0; i < 4; i++) if(set[i] != empty) count++;
+	return count == 0 ? vec3(1, 0, 0) : count == 1 ? vec3(0, 0, 1) : vec3(0, 1, 0);
 }
 
 vec3 tilted_1(float g1, float g2, float wp)

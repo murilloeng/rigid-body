@@ -10,7 +10,7 @@
 
 
 //constructor
-Plotter::Plotter(void) : m_frame(0), m_marks(9), m_frames(200)
+Plotter::Plotter(void) : m_font(new Font), m_frame(0), m_marks(9), m_frames(200)
 {
 	m_master = this;
 }
@@ -18,19 +18,19 @@ Plotter::Plotter(void) : m_frame(0), m_marks(9), m_frames(200)
 //destructor
 Plotter::~Plotter(void)
 {
-	FT_Done_FreeType(m_ft_library);
+	delete m_font;
 	if(glIsBuffer(m_vao_id_plot)) glDeleteBuffers(1, &m_vao_id_plot);
 	if(glIsBuffer(m_vbo_id_plot)) glDeleteBuffers(1, &m_vbo_id_plot);
 	if(glIsBuffer(m_ibo_id_plot)) glDeleteBuffers(1, &m_ibo_id_plot);
-	if(glIsBuffer(m_vao_id_text)) glDeleteBuffers(1, &m_vao_id_text);
-	if(glIsBuffer(m_vbo_id_text)) glDeleteBuffers(1, &m_vbo_id_text);
-	if(glIsBuffer(m_ibo_id_text)) glDeleteBuffers(1, &m_ibo_id_text);
 	if(glIsBuffer(m_vao_id_mark)) glDeleteBuffers(1, &m_vao_id_mark);
 	if(glIsBuffer(m_vbo_id_mark)) glDeleteBuffers(1, &m_vbo_id_mark);
 	if(glIsBuffer(m_ibo_id_mark)) glDeleteBuffers(1, &m_ibo_id_mark);
+	if(glIsBuffer(m_vao_id_text)) glDeleteBuffers(1, &m_vao_id_text);
+	if(glIsBuffer(m_vbo_id_text)) glDeleteBuffers(1, &m_vbo_id_text);
+	if(glIsBuffer(m_ibo_id_text)) glDeleteBuffers(1, &m_ibo_id_text);
 	if(glIsProgram(m_program_id_plot)) glDeleteProgram(m_program_id_plot);
-	if(glIsProgram(m_program_id_text)) glDeleteProgram(m_program_id_text);
 	if(glIsProgram(m_program_id_mark)) glDeleteProgram(m_program_id_mark);
+	if(glIsProgram(m_program_id_text)) glDeleteProgram(m_program_id_text);
 }
 
 void Plotter::setup(void)
@@ -39,9 +39,10 @@ void Plotter::setup(void)
 	glClearColor(1, 1, 1, 1);
 	//setup
 	setup_buffers();
+	setup_freetype();
 	setup_program(m_program_id_plot, "shd/plot.vert", "shd/plot.frag");
-	// setup_program(m_program_id_text, "shd/text.vert", "shd/text.frag");
 	setup_program(m_program_id_mark, "shd/mark.vert", "shd/mark.frag");
+	setup_program(m_program_id_text, "shd/text.vert", "shd/text.frag");
 	//data
 	setup_data();
 	setup_uniforms();
@@ -52,9 +53,13 @@ void Plotter::setup_data(void)
 	//data
 	const float ms = m_offset / 2;
 	const float ps = 1 - m_offset;
+	//ibo data
+	unsigned ibo_data_text[3 * 2];
 	unsigned ibo_data_mark[8 * (1 + m_marks)];
-	float vbo_data_mark[8 * (1 + 2 * m_marks)];
 	const unsigned ibo_data_plot[] = {0, 1, 2, 0, 2, 3};
+	//vbo data
+	float vbo_data_text[4 * 4];
+	float vbo_data_mark[8 * (1 + 2 * m_marks)];
 	const float vbo_data_plot[] = {-ps, -ps, +ps, -ps, +ps, +ps, -ps, +ps};
 	//plot
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_plot);
@@ -100,7 +105,38 @@ void Plotter::setup_data(void)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_mark);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data_mark), vbo_data_mark, GL_DYNAMIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data_mark), ibo_data_mark, GL_DYNAMIC_DRAW);
-
+	//text
+	const unsigned wf = Font::width();
+	const unsigned hf = Font::height();
+	const int w = m_font->m_chars['A'].width();
+	const int h = m_font->m_chars['A'].height();
+	const int x = m_font->m_chars['A'].offset();
+	ibo_data_text[3 * 0 + 0] = 0;
+	ibo_data_text[3 * 0 + 1] = 1;
+	ibo_data_text[3 * 0 + 2] = 2;
+	ibo_data_text[3 * 1 + 0] = 0;
+	ibo_data_text[3 * 1 + 1] = 2;
+	ibo_data_text[3 * 1 + 2] = 3;
+	vbo_data_text[4 * 0 + 0] = 0.4;
+	vbo_data_text[4 * 0 + 1] = 0.4;
+	vbo_data_text[4 * 0 + 2] = float(x) / wf;
+	vbo_data_text[4 * 0 + 3] = float(h) / hf;
+	vbo_data_text[4 * 1 + 0] = 0.6;
+	vbo_data_text[4 * 1 + 1] = 0.4;
+	vbo_data_text[4 * 1 + 2] = float(x + w) / wf;
+	vbo_data_text[4 * 1 + 3] = float(h) / hf;
+	vbo_data_text[4 * 2 + 0] = 0.6;
+	vbo_data_text[4 * 2 + 1] = 0.6;
+	vbo_data_text[4 * 2 + 2] = float(x + w) / wf;
+	vbo_data_text[4 * 2 + 3] = float(0) / hf;
+	vbo_data_text[4 * 3 + 0] = 0.4;
+	vbo_data_text[4 * 3 + 1] = 0.6;
+	vbo_data_text[4 * 3 + 2] = float(x) / wf;
+	vbo_data_text[4 * 3 + 3] = float(0) / hf;
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_text);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_text);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data_text), vbo_data_text, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data_text), ibo_data_text, GL_DYNAMIC_DRAW);
 }
 void Plotter::setup_buffers(void)
 {
@@ -121,6 +157,12 @@ void Plotter::setup_buffers(void)
 	//attributes
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (unsigned*) (0 * sizeof(float)));
+	//vao mark
+	glBindVertexArray(m_vao_id_mark);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_mark);
+	//attributes
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (unsigned*) (0 * sizeof(float)));
 	//vao text
 	glBindVertexArray(m_vao_id_text);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_text);
@@ -129,20 +171,27 @@ void Plotter::setup_buffers(void)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (unsigned*) (0 * sizeof(float)));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (unsigned*) (2 * sizeof(float)));
-	//vao mark
-	glBindVertexArray(m_vao_id_mark);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_mark);
-	//attributes
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (unsigned*) (0 * sizeof(float)));
 }
 void Plotter::setup_freetype(void)
 {
-	if(FT_Init_FreeType(&m_ft_library))
-	{
-		fprintf(stderr, "Error: Unable to init FreeType Library!\n");
-		exit(EXIT_FAILURE);
-	}
+	//font
+	unsigned w = 0;
+	unsigned h = 0;
+	m_font->setup(w, h);
+	glGenTextures(1, &m_texture_id);
+	glBindTexture(GL_TEXTURE_2D, m_texture_id);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//texture
+	Font::m_width = w;
+	Font::m_height = h;
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBindTexture(GL_TEXTURE_2D, m_texture_id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+	//texture data
+	m_font->setup_texture();
 }
 void Plotter::setup_uniforms(void)
 {
@@ -287,6 +336,13 @@ void Plotter::callback_display(void)
 	glBindBuffer(GL_ARRAY_BUFFER, m_master->m_vbo_id_mark);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_master->m_ibo_id_mark);
 	glDrawElements(GL_LINES, 8 * (1 + m_master->m_marks), GL_UNSIGNED_INT, nullptr);
+	//draw text
+	glUseProgram(m_master->m_program_id_text);
+	glBindVertexArray(m_master->m_vao_id_text);
+	glBindTexture(GL_TEXTURE_2D, m_master->m_texture_id);
+	glBindBuffer(GL_ARRAY_BUFFER, m_master->m_vbo_id_text);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_master->m_ibo_id_text);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	//glut
 	glutSwapBuffers();
 }
