@@ -18,6 +18,7 @@ Plotter::Plotter(void) : m_frame(0), m_marks(9), m_frames(200)
 //destructor
 Plotter::~Plotter(void)
 {
+	FT_Done_FreeType(m_ft_library);
 	if(glIsBuffer(m_vao_id_plot)) glDeleteBuffers(1, &m_vao_id_plot);
 	if(glIsBuffer(m_vbo_id_plot)) glDeleteBuffers(1, &m_vbo_id_plot);
 	if(glIsBuffer(m_ibo_id_plot)) glDeleteBuffers(1, &m_ibo_id_plot);
@@ -134,6 +135,14 @@ void Plotter::setup_buffers(void)
 	//attributes
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (unsigned*) (0 * sizeof(float)));
+}
+void Plotter::setup_freetype(void)
+{
+	if(FT_Init_FreeType(&m_ft_library))
+	{
+		fprintf(stderr, "Error: Unable to init FreeType Library!\n");
+		exit(EXIT_FAILURE);
+	}
 }
 void Plotter::setup_uniforms(void)
 {

@@ -155,17 +155,18 @@ vec3 vertical_limit(float g1, float g2)
 		intersection(intersection(i0, i2), i3),
 		intersection(intersection(i0, i2), i4)
 	};
-	bool[4] flags = {true, true, true, true};
-	combine(set, flags);
-	uint count = 0;
+	if(set[0] == empty && set[1] == empty && set[2] == empty && set[3] == empty)
+	{
+		return vec3(1, 0, 0);
+	}
 	for(uint i = 0; i < 4; i++)
 	{
-		if(flags[i])
+		if(set[i] != empty && set[i].m_max != inf)
 		{
-			count++;
+			return vec3(0, 1, 0);
 		}
 	}
-	return count == 0 ? vec3(0, 0, 1) : vec3(1, 0, 0);
+	return vec3(0, 0, 1);
 }
 
 vec3 tilted_1(float g1, float g2, float wp)

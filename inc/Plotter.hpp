@@ -4,6 +4,7 @@
 
 //ext
 #include <GL/glew.h>
+#include <freetype/freetype.h>
 
 class Plotter
 {
@@ -18,6 +19,7 @@ public:
 	void setup(void);
 	void setup_data(void);
 	void setup_buffers(void);
+	void setup_freetype(void);
 	void setup_uniforms(void);
 	static void setup_shader(GLuint, GLenum, const char*);
 	static void setup_program(GLuint&, const char*, const char*);
@@ -54,6 +56,7 @@ public:
 	GLuint m_vao_id_mark;
 	GLuint m_vbo_id_mark;
 	GLuint m_ibo_id_mark;
+	FT_Library m_ft_library;
 	GLuint m_program_id_plot;
 	GLuint m_program_id_text;
 	GLuint m_program_id_mark;
