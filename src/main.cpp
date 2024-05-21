@@ -94,6 +94,7 @@ void top_tilted(unsigned index, double g1, double g2, double qt)
 int main(void)
 {
 	//test
+	printf("%+.2lf\n", M_PI);
 	domains_vertical();
 	// const double g1 = 0.80;
 	// const double g2 = 1.20;

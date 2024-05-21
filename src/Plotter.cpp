@@ -50,93 +50,9 @@ void Plotter::setup(void)
 //draw
 void Plotter::setup_data(void)
 {
-	//data
-	const float ms = m_offset / 2;
-	const float ps = 1 - m_offset;
-	//ibo data
-	unsigned ibo_data_text[3 * 2];
-	unsigned ibo_data_mark[8 * (1 + m_marks)];
-	const unsigned ibo_data_plot[] = {0, 1, 2, 0, 2, 3};
-	//vbo data
-	float vbo_data_text[4 * 4];
-	float vbo_data_mark[8 * (1 + 2 * m_marks)];
-	const float vbo_data_plot[] = {-ps, -ps, +ps, -ps, +ps, +ps, -ps, +ps};
-	//plot
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_plot);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_plot);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data_plot), vbo_data_plot, GL_DYNAMIC_DRAW);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data_plot), ibo_data_plot, GL_DYNAMIC_DRAW);
-	//mark
-	for(unsigned i = 0; i < 4; i++)
-	{
-		ibo_data_mark[2 * i + 0] = (i + 0) % 4;
-		ibo_data_mark[2 * i + 1] = (i + 1) % 4;
-		vbo_data_mark[2 * i + 0] = i == 0 || i == 3 ? -ps : +ps;
-		vbo_data_mark[2 * i + 1] = i == 0 || i == 1 ? -ps : +ps;
-	}
-	for(unsigned i = 0; i < m_marks; i++)
-	{
-		ibo_data_mark[2 * (i + 0 * m_marks + 4) + 0] = i + 0 * m_marks + 4;
-		ibo_data_mark[2 * (i + 0 * m_marks + 4) + 1] = i + 1 * m_marks + 4;
-		ibo_data_mark[2 * (i + 1 * m_marks + 4) + 0] = i + 2 * m_marks + 4;
-		ibo_data_mark[2 * (i + 1 * m_marks + 4) + 1] = i + 3 * m_marks + 4;
-		ibo_data_mark[2 * (i + 2 * m_marks + 4) + 0] = i + 4 * m_marks + 4;
-		ibo_data_mark[2 * (i + 2 * m_marks + 4) + 1] = i + 5 * m_marks + 4;
-		ibo_data_mark[2 * (i + 3 * m_marks + 4) + 0] = i + 6 * m_marks + 4;
-		ibo_data_mark[2 * (i + 3 * m_marks + 4) + 1] = i + 7 * m_marks + 4;
-		vbo_data_mark[2 * (i + 0 * m_marks + 4) + 1] = -ps;
-		vbo_data_mark[2 * (i + 2 * m_marks + 4) + 0] = +ps;
-		vbo_data_mark[2 * (i + 4 * m_marks + 4) + 1] = +ps;
-		vbo_data_mark[2 * (i + 6 * m_marks + 4) + 0] = -ps;
-		vbo_data_mark[2 * (i + 1 * m_marks + 4) + 1] = -ps + ms;
-		vbo_data_mark[2 * (i + 3 * m_marks + 4) + 0] = +ps - ms;
-		vbo_data_mark[2 * (i + 5 * m_marks + 4) + 1] = +ps - ms;
-		vbo_data_mark[2 * (i + 7 * m_marks + 4) + 0] = -ps + ms;
-		vbo_data_mark[2 * (i + 0 * m_marks + 4) + 0] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
-		vbo_data_mark[2 * (i + 1 * m_marks + 4) + 0] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
-		vbo_data_mark[2 * (i + 2 * m_marks + 4) + 1] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
-		vbo_data_mark[2 * (i + 3 * m_marks + 4) + 1] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
-		vbo_data_mark[2 * (i + 4 * m_marks + 4) + 0] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
-		vbo_data_mark[2 * (i + 5 * m_marks + 4) + 0] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
-		vbo_data_mark[2 * (i + 6 * m_marks + 4) + 1] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
-		vbo_data_mark[2 * (i + 7 * m_marks + 4) + 1] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_mark);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_mark);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data_mark), vbo_data_mark, GL_DYNAMIC_DRAW);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data_mark), ibo_data_mark, GL_DYNAMIC_DRAW);
-	//text
-	const unsigned wf = Font::width();
-	const unsigned hf = Font::height();
-	const int w = m_font->m_chars['A'].width();
-	const int h = m_font->m_chars['A'].height();
-	const int x = m_font->m_chars['A'].offset();
-	ibo_data_text[3 * 0 + 0] = 0;
-	ibo_data_text[3 * 0 + 1] = 1;
-	ibo_data_text[3 * 0 + 2] = 2;
-	ibo_data_text[3 * 1 + 0] = 0;
-	ibo_data_text[3 * 1 + 1] = 2;
-	ibo_data_text[3 * 1 + 2] = 3;
-	vbo_data_text[4 * 0 + 0] = 0.4;
-	vbo_data_text[4 * 0 + 1] = 0.4;
-	vbo_data_text[4 * 0 + 2] = float(x) / wf;
-	vbo_data_text[4 * 0 + 3] = float(h) / hf;
-	vbo_data_text[4 * 1 + 0] = 0.6;
-	vbo_data_text[4 * 1 + 1] = 0.4;
-	vbo_data_text[4 * 1 + 2] = float(x + w) / wf;
-	vbo_data_text[4 * 1 + 3] = float(h) / hf;
-	vbo_data_text[4 * 2 + 0] = 0.6;
-	vbo_data_text[4 * 2 + 1] = 0.6;
-	vbo_data_text[4 * 2 + 2] = float(x + w) / wf;
-	vbo_data_text[4 * 2 + 3] = float(0) / hf;
-	vbo_data_text[4 * 3 + 0] = 0.4;
-	vbo_data_text[4 * 3 + 1] = 0.6;
-	vbo_data_text[4 * 3 + 2] = float(x) / wf;
-	vbo_data_text[4 * 3 + 3] = float(0) / hf;
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_text);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_text);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data_text), vbo_data_text, GL_DYNAMIC_DRAW);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data_text), ibo_data_text, GL_DYNAMIC_DRAW);
+	setup_data_plot();
+	setup_data_mark();
+	setup_data_text();
 }
 void Plotter::setup_buffers(void)
 {
@@ -204,6 +120,125 @@ void Plotter::setup_uniforms(void)
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x2_max"), m_x2_max);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x3_min"), m_x3_min);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x3_max"), m_x3_max);
+}
+void Plotter::setup_data_plot(void)
+{
+	//data
+	const float ps = 1 - m_offset;
+	const unsigned ibo_data[] = {0, 1, 2, 0, 2, 3};
+	const float vbo_data[] = {-ps, -ps, +ps, -ps, +ps, +ps, -ps, +ps};
+	//transfer data
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_plot);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_plot);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data), vbo_data, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data), ibo_data, GL_DYNAMIC_DRAW);
+}
+void Plotter::setup_data_mark(void)
+{
+	//data
+	const float ms = m_offset / 2;
+	const float ps = 1 - m_offset;
+	unsigned ibo_data[8 * (1 + m_marks)];
+	float vbo_data[8 * (1 + 2 * m_marks)];
+	//outer lines
+	for(unsigned i = 0; i < 4; i++)
+	{
+		ibo_data[2 * i + 0] = (i + 0) % 4;
+		ibo_data[2 * i + 1] = (i + 1) % 4;
+		vbo_data[2 * i + 0] = i == 0 || i == 3 ? -ps : +ps;
+		vbo_data[2 * i + 1] = i == 0 || i == 1 ? -ps : +ps;
+	}
+	//inner lines
+	for(unsigned i = 0; i < m_marks; i++)
+	{
+		ibo_data[2 * (i + 0 * m_marks + 4) + 0] = i + 0 * m_marks + 4;
+		ibo_data[2 * (i + 0 * m_marks + 4) + 1] = i + 1 * m_marks + 4;
+		ibo_data[2 * (i + 1 * m_marks + 4) + 0] = i + 2 * m_marks + 4;
+		ibo_data[2 * (i + 1 * m_marks + 4) + 1] = i + 3 * m_marks + 4;
+		ibo_data[2 * (i + 2 * m_marks + 4) + 0] = i + 4 * m_marks + 4;
+		ibo_data[2 * (i + 2 * m_marks + 4) + 1] = i + 5 * m_marks + 4;
+		ibo_data[2 * (i + 3 * m_marks + 4) + 0] = i + 6 * m_marks + 4;
+		ibo_data[2 * (i + 3 * m_marks + 4) + 1] = i + 7 * m_marks + 4;
+	}
+	for(unsigned i = 0; i < m_marks; i++)
+	{
+		vbo_data[2 * (i + 0 * m_marks + 4) + 1] = -ps;
+		vbo_data[2 * (i + 2 * m_marks + 4) + 0] = +ps;
+		vbo_data[2 * (i + 4 * m_marks + 4) + 1] = +ps;
+		vbo_data[2 * (i + 6 * m_marks + 4) + 0] = -ps;
+		vbo_data[2 * (i + 1 * m_marks + 4) + 1] = -ps + ms;
+		vbo_data[2 * (i + 3 * m_marks + 4) + 0] = +ps - ms;
+		vbo_data[2 * (i + 5 * m_marks + 4) + 1] = +ps - ms;
+		vbo_data[2 * (i + 7 * m_marks + 4) + 0] = -ps + ms;
+		vbo_data[2 * (i + 0 * m_marks + 4) + 0] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data[2 * (i + 1 * m_marks + 4) + 0] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data[2 * (i + 2 * m_marks + 4) + 1] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data[2 * (i + 3 * m_marks + 4) + 1] = 2 * ps * float(i + 1) / (m_marks + 1) - ps;
+		vbo_data[2 * (i + 4 * m_marks + 4) + 0] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+		vbo_data[2 * (i + 5 * m_marks + 4) + 0] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+		vbo_data[2 * (i + 6 * m_marks + 4) + 1] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+		vbo_data[2 * (i + 7 * m_marks + 4) + 1] = ps - 2 * ps * float(i + 1) / (m_marks + 1);
+	}
+	//transfer data
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_mark);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_mark);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data), vbo_data, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data), ibo_data, GL_DYNAMIC_DRAW);
+}
+void Plotter::setup_data_text(void)
+{
+	//data
+	float vbo_data[32 * (m_marks + 2)];
+	unsigned ibo_data[48 * (m_marks + 2)];
+	//ibo data
+	for(unsigned i = 0; i < 8 * (m_marks + 2); i++)
+	{
+		ibo_data[6 * i + 0] = 4 * i + 0;
+		ibo_data[6 * i + 1] = 4 * i + 1;
+		ibo_data[6 * i + 2] = 4 * i + 2;
+		ibo_data[6 * i + 3] = 4 * i + 0;
+		ibo_data[6 * i + 4] = 4 * i + 2;
+		ibo_data[6 * i + 5] = 4 * i + 3;
+	}
+	//vbo data
+	// for (unsigned i = 0; i < count; i++)
+	// {
+	// 	/* code */
+	// }
+	
+	//text
+	// const unsigned wf = Font::width();
+	// const unsigned hf = Font::height();
+	// const int w = m_font->m_chars['A'].width();
+	// const int h = m_font->m_chars['A'].height();
+	// const int x = m_font->m_chars['A'].offset();
+	// ibo_data[3 * 0 + 0] = 0;
+	// ibo_data[3 * 0 + 1] = 1;
+	// ibo_data[3 * 0 + 2] = 2;
+	// ibo_data[3 * 1 + 0] = 0;
+	// ibo_data[3 * 1 + 1] = 2;
+	// ibo_data[3 * 1 + 2] = 3;
+	// vbo_data[4 * 0 + 0] = 0.4;
+	// vbo_data[4 * 0 + 1] = 0.4;
+	// vbo_data[4 * 0 + 2] = float(x) / wf;
+	// vbo_data[4 * 0 + 3] = float(h) / hf;
+	// vbo_data[4 * 1 + 0] = 0.6;
+	// vbo_data[4 * 1 + 1] = 0.4;
+	// vbo_data[4 * 1 + 2] = float(x + w) / wf;
+	// vbo_data[4 * 1 + 3] = float(h) / hf;
+	// vbo_data[4 * 2 + 0] = 0.6;
+	// vbo_data[4 * 2 + 1] = 0.6;
+	// vbo_data[4 * 2 + 2] = float(x + w) / wf;
+	// vbo_data[4 * 2 + 3] = float(0) / hf;
+	// vbo_data[4 * 3 + 0] = 0.4;
+	// vbo_data[4 * 3 + 1] = 0.6;
+	// vbo_data[4 * 3 + 2] = float(x) / wf;
+	// vbo_data[4 * 3 + 3] = float(0) / hf;
+	//transfer data
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_text);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_text);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data), vbo_data, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data), ibo_data, GL_DYNAMIC_DRAW);
 }
 void Plotter::setup_shader(GLuint program_id, GLenum shader_type, const char* shader_path)
 {

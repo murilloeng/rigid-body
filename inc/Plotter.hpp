@@ -24,6 +24,9 @@ public:
 	void setup_buffers(void);
 	void setup_freetype(void);
 	void setup_uniforms(void);
+	void setup_data_plot(void);
+	void setup_data_mark(void);
+	void setup_data_text(void);
 	static void setup_shader(GLuint, GLenum, const char*);
 	static void setup_program(GLuint&, const char*, const char*);
 
