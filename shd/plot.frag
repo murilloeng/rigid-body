@@ -3,6 +3,7 @@
 uniform uint width;
 uniform uint height;
 
+uniform uint mode;
 uniform float time;
 uniform float offset;
 uniform float x1_min;
@@ -185,5 +186,8 @@ void main(void)
 	float x3 = (x3_max - x3_min) * time + x3_min;
 	float x1 = (x1_max - x1_min) / s * (gl_FragCoord.x / w - d) + x1_min;
 	float x2 = (x2_max - x2_min) / s * (gl_FragCoord.y / h - d) + x2_min;
-	fragment_color = vec4(vertical_limit(x1, x2), 1);
+	fragment_color = 
+		mode == 0 ? vec4(vertical(x1, x2, x3), 1) : 
+		mode == 1 ? vec4(vertical_limit(x1, x2), 1) : 
+		vec4(0, 0, 0, 0);
 }

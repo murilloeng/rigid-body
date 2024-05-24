@@ -27,6 +27,11 @@ public:
 	void setup_data_plot(void);
 	void setup_data_mark(void);
 	void setup_data_text(void);
+	void setup_data_text_1(float*);
+	void setup_data_text_2(float*);
+	void setup_data_text_3(float*);
+	void setup_data_text(float*&, const char*, float, float, float, unsigned, unsigned);
+
 	static void setup_shader(GLuint, GLenum, const char*);
 	static void setup_program(GLuint&, const char*, const char*);
 
@@ -51,8 +56,11 @@ public:
 	float m_x2_max;
 	float m_x3_min;
 	float m_x3_max;
+	unsigned m_mode;
 	unsigned m_frame;
 	unsigned m_marks;
+	unsigned m_width;
+	unsigned m_height;
 	unsigned m_frames;
 	GLuint m_texture_id;
 	GLuint m_vao_id_plot;

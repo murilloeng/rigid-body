@@ -9,10 +9,11 @@
 void domains_vertical(void)
 {
 	Plotter plotter;
+	plotter.m_mode = 0;
 	plotter.m_x1_min = 0;
-	plotter.m_x1_max = 2;
+	plotter.m_x1_max = 5;
 	plotter.m_x2_min = 0;
-	plotter.m_x2_max = 2;
+	plotter.m_x2_max = 5;
 	plotter.m_x3_min = 0;
 	plotter.m_x3_max = 5;
 	plotter.plot();
@@ -50,7 +51,7 @@ void top_vertical(unsigned index, double h, double g1, double g2, double wp, con
 	top.setup();
 	top.solve();
 	top.finish();
-	// top.draw(10);
+	top.draw(1);
 }
 void top_tilted(unsigned index, double g1, double g2, double qt)
 {
@@ -94,14 +95,15 @@ void top_tilted(unsigned index, double g1, double g2, double qt)
 int main(void)
 {
 	//test
-	printf("%+.2lf\n", M_PI);
-	domains_vertical();
 	// const double g1 = 0.80;
 	// const double g2 = 1.20;
 	// const double w1 = 1.90684;
 	// const double w2 = 2.23604;
 	// top_vertical(1, 0.10, g1, g2, 1.01 * w1, "top_vertical_1");
 	// top_vertical(1, 0.10, g1, g2, 0.99 * w1, "top_vertical_2");
+	// system("gnuplot -p -e \"index = 2; model = 'top_vertical_1'\" data/top.gp");
+	// system("gnuplot -p -e \"index = 2; model = 'top_vertical_2'\" data/top.gp");
+	domains_vertical();
 	//return
 	return 0;
 }

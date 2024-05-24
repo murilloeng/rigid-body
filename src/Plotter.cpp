@@ -10,7 +10,7 @@
 
 
 //constructor
-Plotter::Plotter(void) : m_font(new Font), m_frame(0), m_marks(9), m_frames(200)
+Plotter::Plotter(void) : m_font(new Font), m_mode(0), m_frame(0), m_marks(9), m_frames(200)
 {
 	m_master = this;
 }
@@ -35,7 +35,7 @@ Plotter::~Plotter(void)
 
 void Plotter::setup(void)
 {
-	//color
+	//opengGL
 	glClearColor(1, 1, 1, 1);
 	//setup
 	setup_buffers();
@@ -113,6 +113,7 @@ void Plotter::setup_uniforms(void)
 {
 	glUseProgram(m_program_id_plot);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "time"), 0);
+	glUniform1ui(glGetUniformLocation(m_program_id_plot, "mode"), m_mode);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "offset"), m_offset);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x1_min"), m_x1_min);
 	glUniform1f(glGetUniformLocation(m_program_id_plot, "x1_max"), m_x1_max);
@@ -136,7 +137,7 @@ void Plotter::setup_data_plot(void)
 void Plotter::setup_data_mark(void)
 {
 	//data
-	const float ms = m_offset / 2;
+	const float ms = m_offset / 4;
 	const float ps = 1 - m_offset;
 	unsigned ibo_data[8 * (1 + m_marks)];
 	float vbo_data[8 * (1 + 2 * m_marks)];
@@ -187,11 +188,10 @@ void Plotter::setup_data_mark(void)
 }
 void Plotter::setup_data_text(void)
 {
-	//data
-	float vbo_data[32 * (m_marks + 2)];
-	unsigned ibo_data[48 * (m_marks + 2)];
 	//ibo data
-	for(unsigned i = 0; i < 8 * (m_marks + 2); i++)
+	float vbo_data[128 * (m_marks + 2) + 64];
+	unsigned ibo_data[48 * (m_marks + 2) + 24];
+	for(unsigned i = 0; i < 8 * (m_marks + 2) + 4; i++)
 	{
 		ibo_data[6 * i + 0] = 4 * i + 0;
 		ibo_data[6 * i + 1] = 4 * i + 1;
@@ -201,44 +201,210 @@ void Plotter::setup_data_text(void)
 		ibo_data[6 * i + 5] = 4 * i + 3;
 	}
 	//vbo data
-	// for (unsigned i = 0; i < count; i++)
-	// {
-	// 	/* code */
-	// }
-	
-	//text
-	// const unsigned wf = Font::width();
-	// const unsigned hf = Font::height();
-	// const int w = m_font->m_chars['A'].width();
-	// const int h = m_font->m_chars['A'].height();
-	// const int x = m_font->m_chars['A'].offset();
-	// ibo_data[3 * 0 + 0] = 0;
-	// ibo_data[3 * 0 + 1] = 1;
-	// ibo_data[3 * 0 + 2] = 2;
-	// ibo_data[3 * 1 + 0] = 0;
-	// ibo_data[3 * 1 + 1] = 2;
-	// ibo_data[3 * 1 + 2] = 3;
-	// vbo_data[4 * 0 + 0] = 0.4;
-	// vbo_data[4 * 0 + 1] = 0.4;
-	// vbo_data[4 * 0 + 2] = float(x) / wf;
-	// vbo_data[4 * 0 + 3] = float(h) / hf;
-	// vbo_data[4 * 1 + 0] = 0.6;
-	// vbo_data[4 * 1 + 1] = 0.4;
-	// vbo_data[4 * 1 + 2] = float(x + w) / wf;
-	// vbo_data[4 * 1 + 3] = float(h) / hf;
-	// vbo_data[4 * 2 + 0] = 0.6;
-	// vbo_data[4 * 2 + 1] = 0.6;
-	// vbo_data[4 * 2 + 2] = float(x + w) / wf;
-	// vbo_data[4 * 2 + 3] = float(0) / hf;
-	// vbo_data[4 * 3 + 0] = 0.4;
-	// vbo_data[4 * 3 + 1] = 0.6;
-	// vbo_data[4 * 3 + 2] = float(x) / wf;
-	// vbo_data[4 * 3 + 3] = float(0) / hf;
+	char str[5];
+	float* data = vbo_data;
+	const float ps = 1 - m_offset;
+	for(unsigned i = 0; i < m_marks + 2; i++)
+	{
+		sprintf(str, "%.2f", m_x1_min + (m_x1_max - m_x1_min) * i / (m_marks + 1));
+		setup_data_text(data, str, -ps + 2 * ps * i / (m_marks + 1), -ps - m_offset / 4, 0.05, 1, 2);
+		sprintf(str, "%.2f", m_x2_min + (m_x2_max - m_x2_min) * i / (m_marks + 1));
+		setup_data_text(data, str, -ps - m_offset / 4, -ps + 2 * ps * i / (m_marks + 1), 0.05, 2, 1);
+	}
+	setup_data_text(data, "g1", 0, -ps - 0.5 * m_offset, 0.05, 2, 2);
+	setup_data_text(data, "g2", -ps - 0.7 * m_offset, 0, 0.05, 2, 2);
 	//transfer data
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_text);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_text);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data), vbo_data, GL_DYNAMIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data), ibo_data, GL_DYNAMIC_DRAW);
+}
+void Plotter::setup_data_text_1(float* vbo_data)
+{
+	//data
+	char str[5];
+	const float ps = 1 - m_offset;
+	const unsigned wf = m_font->width();
+	const unsigned hf = m_font->height();
+	//vbo data
+	const float fs = 0.05 / hf;
+	for(unsigned i = 0; i < m_marks + 2; i++)
+	{
+		//string
+		float x2 = -ps;
+		float x1 = -ps + 2 * ps * i / (m_marks + 1);
+		sprintf(str, "%.2f", m_x1_min + (m_x1_max - m_x1_min) * i / (m_marks + 1));
+		//characters
+		int wt = 0, ht = 0;
+		for(unsigned j = 0; j < 4; j++)
+		{
+			//data
+			float* data = vbo_data + 64 * i + 16 * j;
+			const int w = m_font->m_chars[unsigned(str[j])].width();
+			const int h = m_font->m_chars[unsigned(str[j])].height();
+			const int x = m_font->m_chars[unsigned(str[j])].offset();
+			const int s = m_font->m_chars[unsigned(str[j])].advance();
+			const int a = m_font->m_chars[unsigned(str[j])].bearing(0);
+			const int b = m_font->m_chars[unsigned(str[j])].bearing(1);
+			//positions
+			data[4 * 0 + 0] = data[4 * 3 + 0] = x1 + fs * a;
+			data[4 * 2 + 1] = data[4 * 3 + 1] = x2 + fs * h;
+			data[4 * 1 + 0] = data[4 * 2 + 0] = x1 + fs * (a + w);
+			data[4 * 0 + 1] = data[4 * 1 + 1] = x2 + fs * (b - h);
+			//texture
+			data[4 * 0 + 3] = data[4 * 1 + 3] = float(h) / hf;
+			data[4 * 0 + 2] = data[4 * 3 + 2] = float(x) / wf;
+			data[4 * 2 + 3] = data[4 * 3 + 3] = float(0) / hf;
+			data[4 * 1 + 2] = data[4 * 2 + 2] = float(x + w) / wf;
+			//update
+			wt += s;
+			x1 += fs * s;
+			ht = std::max(h, ht);
+		}
+		for(unsigned j = 0; j < 16; j++)
+		{
+			vbo_data[64 * i + 4 * j + 0] -= fs * wt / 2;
+			vbo_data[64 * i + 4 * j + 1] -= fs * ht + m_offset / 4;
+		}
+	}
+}
+void Plotter::setup_data_text_2(float* vbo_data)
+{
+	//data
+	char str[5];
+	const float ps = 1 - m_offset;
+	const unsigned wf = m_font->width();
+	const unsigned hf = m_font->height();
+	//vbo data
+	const float fs = 0.05 / hf;
+	for(unsigned i = 0; i < m_marks + 2; i++)
+	{
+		//string
+		float x1 = -ps;
+		float x2 = -ps + 2 * ps * i / (m_marks + 1);
+		sprintf(str, "%.2f", m_x1_min + (m_x1_max - m_x1_min) * i / (m_marks + 1));
+		//characters
+		int wt = 0, ht = 0;
+		for(unsigned j = 0; j < 4; j++)
+		{
+			//data
+			float* data = vbo_data + 64 * i + 16 * j;
+			const int w = m_font->m_chars[unsigned(str[j])].width();
+			const int h = m_font->m_chars[unsigned(str[j])].height();
+			const int x = m_font->m_chars[unsigned(str[j])].offset();
+			const int s = m_font->m_chars[unsigned(str[j])].advance();
+			const int a = m_font->m_chars[unsigned(str[j])].bearing(0);
+			const int b = m_font->m_chars[unsigned(str[j])].bearing(1);
+			//positions
+			data[4 * 0 + 0] = data[4 * 3 + 0] = x1 + fs * a;
+			data[4 * 2 + 1] = data[4 * 3 + 1] = x2 + fs * h;
+			data[4 * 1 + 0] = data[4 * 2 + 0] = x1 + fs * (a + w);
+			data[4 * 0 + 1] = data[4 * 1 + 1] = x2 + fs * (b - h);
+			//texture
+			data[4 * 0 + 3] = data[4 * 1 + 3] = float(h) / hf;
+			data[4 * 0 + 2] = data[4 * 3 + 2] = float(x) / wf;
+			data[4 * 2 + 3] = data[4 * 3 + 3] = float(0) / hf;
+			data[4 * 1 + 2] = data[4 * 2 + 2] = float(x + w) / wf;
+			//update
+			wt += s;
+			x1 += fs * s;
+			ht = std::max(h, ht);
+		}
+		for(unsigned j = 0; j < 16; j++)
+		{
+			vbo_data[64 * i + 4 * j + 1] -= fs * ht / 2;
+			vbo_data[64 * i + 4 * j + 0] -= fs * wt + m_offset / 4;
+		}
+	}
+}
+void Plotter::setup_data_text_3(float* vbo_data)
+{
+	//data
+	const char str[] = "g1";
+	const float ps = 1 - m_offset;
+	const unsigned wf = m_font->width();
+	const unsigned hf = m_font->height();
+	//vbo data
+	const float fs = 0.05 / hf;
+	//string
+	float x1 = 0;
+	float x2 = 0;
+	//characters
+	int wt = 0, ht = 0;
+	for(unsigned j = 0; j < 2; j++)
+	{
+		//data
+		float* data = vbo_data + 16 * j;
+		const int w = m_font->m_chars[unsigned(str[j])].width();
+		const int h = m_font->m_chars[unsigned(str[j])].height();
+		const int x = m_font->m_chars[unsigned(str[j])].offset();
+		const int s = m_font->m_chars[unsigned(str[j])].advance();
+		const int a = m_font->m_chars[unsigned(str[j])].bearing(0);
+		const int b = m_font->m_chars[unsigned(str[j])].bearing(1);
+		//positions
+		data[4 * 0 + 0] = data[4 * 3 + 0] = x1 + fs * a;
+		data[4 * 2 + 1] = data[4 * 3 + 1] = x2 + fs * h;
+		data[4 * 1 + 0] = data[4 * 2 + 0] = x1 + fs * (a + w);
+		data[4 * 0 + 1] = data[4 * 1 + 1] = x2 + fs * (b - h);
+		//texture
+		data[4 * 0 + 3] = data[4 * 1 + 3] = float(h) / hf;
+		data[4 * 0 + 2] = data[4 * 3 + 2] = float(x) / wf;
+		data[4 * 2 + 3] = data[4 * 3 + 3] = float(0) / hf;
+		data[4 * 1 + 2] = data[4 * 2 + 2] = float(x + w) / wf;
+		//update
+		wt += s;
+		x1 += fs * s;
+		ht = std::max(h, ht);
+	}
+	for(unsigned j = 0; j < 8; j++)
+	{
+		vbo_data[4 * j + 1] -= fs * ht / 2;
+		vbo_data[4 * j + 0] -= fs * wt + m_offset / 4;
+	}
+}
+void Plotter::setup_data_text(float*& vbo_data, const char* string, float x1, float x2, float sf, unsigned a1, unsigned a2)
+{
+	//data
+	const unsigned nc = strlen(string);
+	const unsigned wf = m_font->width();
+	const unsigned hf = m_font->height();
+	//chars
+	int wt = 0, ht = 0;
+	for(unsigned i = 0; i < nc; i++)
+	{
+		//data
+		const int w = m_font->m_chars[unsigned(string[i])].width();
+		const int h = m_font->m_chars[unsigned(string[i])].height();
+		const int x = m_font->m_chars[unsigned(string[i])].offset();
+		const int s = m_font->m_chars[unsigned(string[i])].advance();
+		const int a = m_font->m_chars[unsigned(string[i])].bearing(0);
+		const int b = m_font->m_chars[unsigned(string[i])].bearing(1);
+		//positions
+		vbo_data[16 * i + 4 * 0 + 1] = vbo_data[16 * i + 4 * 1 + 1] = x2;
+		vbo_data[16 * i + 4 * 0 + 0] = vbo_data[16 * i + 4 * 3 + 0] = x1 + sf / hf * a;
+		vbo_data[16 * i + 4 * 2 + 1] = vbo_data[16 * i + 4 * 3 + 1] = x2 + sf / hf * h;
+		vbo_data[16 * i + 4 * 1 + 0] = vbo_data[16 * i + 4 * 2 + 0] = x1 + sf / hf * (a + w);
+		//texture
+		vbo_data[16 * i + 4 * 0 + 2] = vbo_data[16 * i + 4 * 3 + 2] = float(x) / wf;
+		vbo_data[16 * i + 4 * 0 + 3] = vbo_data[16 * i + 4 * 1 + 3] = float(h) / hf;
+		vbo_data[16 * i + 4 * 2 + 3] = vbo_data[16 * i + 4 * 3 + 3] = float(0) / hf;
+		vbo_data[16 * i + 4 * 1 + 2] = vbo_data[16 * i + 4 * 2 + 2] = float(x + w) / wf;
+		//update
+		wt += s;
+		x1 += sf / hf * s;
+		ht = std::max(h, ht);
+	}
+	//alignment
+	for(unsigned i = 0; i < nc; i++)
+	{
+		for (unsigned j = 0; j < 4; j++)
+		{
+			vbo_data[16 * i + 4 * j + 0] -= a1 * sf / hf * wt / 2;
+			vbo_data[16 * i + 4 * j + 1] -= a2 * sf / hf * ht / 2;
+		}
+	}
+	//update
+	vbo_data += 16 * nc;
 }
 void Plotter::setup_shader(GLuint program_id, GLenum shader_type, const char* shader_path)
 {
@@ -325,6 +491,7 @@ void Plotter::plot(void)
 	glutInitContextVersion(4, 6);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 	//window
 	glutCreateWindow("Rigid Body");
 	//glew
@@ -377,12 +544,15 @@ void Plotter::callback_display(void)
 	glBindTexture(GL_TEXTURE_2D, m_master->m_texture_id);
 	glBindBuffer(GL_ARRAY_BUFFER, m_master->m_vbo_id_text);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_master->m_ibo_id_text);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, 48 * (m_master->m_marks + 2) + 24, GL_UNSIGNED_INT, nullptr);
 	//glut
 	glutSwapBuffers();
 }
 void Plotter::callback_reshape(int width, int height)
 {
+	//data
+	m_master->m_width = width;
+	m_master->m_height = height;
 	//plot
 	glUseProgram(m_master->m_program_id_plot);
 	glUniform1ui(glGetUniformLocation(m_master->m_program_id_plot, "width"), width);
@@ -406,4 +576,4 @@ void Plotter::callback_keyboard(unsigned char key, int, int)
 
 //static data
 Plotter* Plotter::m_master = nullptr;
-const float Plotter::m_offset = 0.10f;
+const float Plotter::m_offset = 0.25f;

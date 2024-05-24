@@ -69,7 +69,7 @@ void Font::setup(unsigned& w, unsigned& h)
 	}
 	//font
 	FT_Done_Face(m_face);
-	if(FT_New_Face(m_library, "/usr/share/fonts/truetype/msttcorefonts/Courier_New.ttf", 0, &m_face))
+	if(FT_New_Face(m_library, "/usr/share/fonts/truetype/msttcorefonts/times.ttf", 0, &m_face))
 	{
 		fprintf(stderr, "Error: Failed to load font!\n");
 		exit(EXIT_FAILURE);
