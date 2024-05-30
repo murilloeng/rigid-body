@@ -15,7 +15,7 @@ void domains_vertical(void)
 	plotter.m_x2_min = 0;
 	plotter.m_x2_max = 2;
 	plotter.m_x3_min = 0;
-	plotter.m_x3_max = 5;
+	plotter.m_x3_max = 10;
 	plotter.plot();
 }
 void top_vertical(unsigned index, double h, double g1, double g2, double wp, const char* label)

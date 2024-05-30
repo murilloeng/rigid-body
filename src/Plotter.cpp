@@ -1,5 +1,6 @@
 //std
 #include <cstdio>
+#include <filesystem>
 
 //ext
 #include <GL/glew.h>
@@ -10,7 +11,9 @@
 
 
 //constructor
-Plotter::Plotter(void) : m_font(new Font), m_mode(0), m_frame(0), m_marks(9), m_frames(200)
+Plotter::Plotter(void) : 
+	m_font(new Font), m_images(new Image[3]), m_mode(0), m_frame(0), m_marks(9), m_frames(400), 
+	m_label_1("$\\gamma_1$"), m_label_2("$\\gamma_2$"), m_label_3("$w_p: $")
 {
 	m_master = this;
 }
@@ -19,6 +22,7 @@ Plotter::Plotter(void) : m_font(new Font), m_mode(0), m_frame(0), m_marks(9), m_
 Plotter::~Plotter(void)
 {
 	delete m_font;
+	delete[] m_images;
 	if(glIsBuffer(m_vao_id_plot)) glDeleteBuffers(1, &m_vao_id_plot);
 	if(glIsBuffer(m_vbo_id_plot)) glDeleteBuffers(1, &m_vbo_id_plot);
 	if(glIsBuffer(m_ibo_id_plot)) glDeleteBuffers(1, &m_ibo_id_plot);
@@ -31,6 +35,7 @@ Plotter::~Plotter(void)
 	if(glIsProgram(m_program_id_plot)) glDeleteProgram(m_program_id_plot);
 	if(glIsProgram(m_program_id_mark)) glDeleteProgram(m_program_id_mark);
 	if(glIsProgram(m_program_id_text)) glDeleteProgram(m_program_id_text);
+	if(glIsProgram(m_program_id_image)) glDeleteProgram(m_program_id_image);
 }
 
 void Plotter::setup(void)
@@ -38,11 +43,13 @@ void Plotter::setup(void)
 	//opengGL
 	glClearColor(1, 1, 1, 1);
 	//setup
+	setup_latex();
 	setup_buffers();
 	setup_freetype();
 	setup_program(m_program_id_plot, "shd/plot.vert", "shd/plot.frag");
 	setup_program(m_program_id_mark, "shd/mark.vert", "shd/mark.frag");
 	setup_program(m_program_id_text, "shd/text.vert", "shd/text.frag");
+	setup_program(m_program_id_image, "shd/image.vert", "shd/image.frag");
 	//data
 	setup_data();
 	setup_uniforms();
@@ -53,6 +60,36 @@ void Plotter::setup_data(void)
 	setup_data_plot();
 	setup_data_mark();
 	setup_data_text();
+	setup_data_image();
+}
+void Plotter::setup_latex(void)
+{
+	//latex
+	Image::m_total_width = 0;
+	Image::m_total_height = 0;
+	setup_latex("label_1", m_label_1, 0);
+	setup_latex("label_2", m_label_2, 1);
+	setup_latex("label_3", m_label_3, 2);
+	//images
+	glGenTextures(1, &m_texture_id_image);
+	glBindTexture(GL_TEXTURE_2D, m_texture_id_image);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	//texture
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBindTexture(GL_TEXTURE_2D, m_texture_id_image);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Image::m_total_width, Image::m_total_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	//texture data
+	for(unsigned i = 0; i < 3; i++)
+	{
+		const unsigned w = m_images[i].m_width;
+		const unsigned h = m_images[i].m_height;
+		const unsigned x = m_images[i].m_offset;
+		const unsigned char* data = m_images[i].m_data;
+		glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	}
 }
 void Plotter::setup_buffers(void)
 {
@@ -60,12 +97,15 @@ void Plotter::setup_buffers(void)
 	glGenBuffers(1, &m_vbo_id_plot);
 	glGenBuffers(1, &m_vbo_id_text);
 	glGenBuffers(1, &m_vbo_id_mark);
+	glGenBuffers(1, &m_vbo_id_image);
 	glGenBuffers(1, &m_ibo_id_plot);
 	glGenBuffers(1, &m_ibo_id_text);
 	glGenBuffers(1, &m_ibo_id_mark);
+	glGenBuffers(1, &m_ibo_id_image);
 	glGenVertexArrays(1, &m_vao_id_plot);
 	glGenVertexArrays(1, &m_vao_id_text);
 	glGenVertexArrays(1, &m_vao_id_mark);
+	glGenVertexArrays(1, &m_vao_id_image);
 	//buffers plot
 	glBindVertexArray(m_vao_id_plot);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_plot);
@@ -87,6 +127,14 @@ void Plotter::setup_buffers(void)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (unsigned*) (0 * sizeof(float)));
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (unsigned*) (2 * sizeof(float)));
+	//vao image
+	glBindVertexArray(m_vao_id_image);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_image);
+	//attributes
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (unsigned*) (0 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (unsigned*) (2 * sizeof(float)));
 }
 void Plotter::setup_freetype(void)
 {
@@ -94,17 +142,17 @@ void Plotter::setup_freetype(void)
 	unsigned w = 0;
 	unsigned h = 0;
 	m_font->setup(w, h);
-	glGenTextures(1, &m_texture_id);
-	glBindTexture(GL_TEXTURE_2D, m_texture_id);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenTextures(1, &m_texture_id_text);
+	glBindTexture(GL_TEXTURE_2D, m_texture_id_text);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	//texture
 	Font::m_width = w;
 	Font::m_height = h;
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glBindTexture(GL_TEXTURE_2D, m_texture_id);
+	glBindTexture(GL_TEXTURE_2D, m_texture_id_text);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, w, h, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 	//texture data
 	m_font->setup_texture();
@@ -191,7 +239,7 @@ void Plotter::setup_data_text(void)
 	//ibo data
 	float vbo_data[128 * (m_marks + 2) + 64];
 	unsigned ibo_data[48 * (m_marks + 2) + 24];
-	for(unsigned i = 0; i < 8 * (m_marks + 2) + 4; i++)
+	for(unsigned i = 0; i < 8 * (m_marks + 2) + 6; i++)
 	{
 		ibo_data[6 * i + 0] = 4 * i + 0;
 		ibo_data[6 * i + 1] = 4 * i + 1;
@@ -211,156 +259,94 @@ void Plotter::setup_data_text(void)
 		sprintf(str, "%.2f", m_x2_min + (m_x2_max - m_x2_min) * i / (m_marks + 1));
 		setup_data_text(data, str, -ps - m_offset / 4, -ps + 2 * ps * i / (m_marks + 1), 0.05, 2, 1);
 	}
-	setup_data_text(data, "g1", 0, -ps - 0.5 * m_offset, 0.05, 2, 2);
-	setup_data_text(data, "g2", -ps - 0.7 * m_offset, 0, 0.05, 2, 2);
+	setup_data_text(data, "0.00", 0, +ps + 0.5 * m_offset, 0.05, 0, 1);
 	//transfer data
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_text);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_text);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data), vbo_data, GL_DYNAMIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data), ibo_data, GL_DYNAMIC_DRAW);
 }
-void Plotter::setup_data_text_1(float* vbo_data)
+void Plotter::setup_data_image(void)
 {
-	//data
-	char str[5];
-	const float ps = 1 - m_offset;
-	const unsigned wf = m_font->width();
-	const unsigned hf = m_font->height();
-	//vbo data
-	const float fs = 0.05 / hf;
-	for(unsigned i = 0; i < m_marks + 2; i++)
+	//ibo data
+	float vbo_data[48];
+	unsigned ibo_data[18];
+	for(unsigned i = 0; i < 3; i++)
 	{
-		//string
-		float x2 = -ps;
-		float x1 = -ps + 2 * ps * i / (m_marks + 1);
-		sprintf(str, "%.2f", m_x1_min + (m_x1_max - m_x1_min) * i / (m_marks + 1));
-		//characters
-		int wt = 0, ht = 0;
-		for(unsigned j = 0; j < 4; j++)
-		{
-			//data
-			float* data = vbo_data + 64 * i + 16 * j;
-			const int w = m_font->m_chars[unsigned(str[j])].width();
-			const int h = m_font->m_chars[unsigned(str[j])].height();
-			const int x = m_font->m_chars[unsigned(str[j])].offset();
-			const int s = m_font->m_chars[unsigned(str[j])].advance();
-			const int a = m_font->m_chars[unsigned(str[j])].bearing(0);
-			const int b = m_font->m_chars[unsigned(str[j])].bearing(1);
-			//positions
-			data[4 * 0 + 0] = data[4 * 3 + 0] = x1 + fs * a;
-			data[4 * 2 + 1] = data[4 * 3 + 1] = x2 + fs * h;
-			data[4 * 1 + 0] = data[4 * 2 + 0] = x1 + fs * (a + w);
-			data[4 * 0 + 1] = data[4 * 1 + 1] = x2 + fs * (b - h);
-			//texture
-			data[4 * 0 + 3] = data[4 * 1 + 3] = float(h) / hf;
-			data[4 * 0 + 2] = data[4 * 3 + 2] = float(x) / wf;
-			data[4 * 2 + 3] = data[4 * 3 + 3] = float(0) / hf;
-			data[4 * 1 + 2] = data[4 * 2 + 2] = float(x + w) / wf;
-			//update
-			wt += s;
-			x1 += fs * s;
-			ht = std::max(h, ht);
-		}
-		for(unsigned j = 0; j < 16; j++)
-		{
-			vbo_data[64 * i + 4 * j + 0] -= fs * wt / 2;
-			vbo_data[64 * i + 4 * j + 1] -= fs * ht + m_offset / 4;
-		}
+		ibo_data[6 * i + 0] = 4 * i + 0;
+		ibo_data[6 * i + 1] = 4 * i + 1;
+		ibo_data[6 * i + 2] = 4 * i + 2;
+		ibo_data[6 * i + 3] = 4 * i + 0;
+		ibo_data[6 * i + 4] = 4 * i + 2;
+		ibo_data[6 * i + 5] = 4 * i + 3;
 	}
+	//vbo data
+	float* data = vbo_data;
+	setup_data_image(data, 0, 0, -1 + 0.5 * m_offset, 0.0005, 1, 2);
+	setup_data_image(data, 1, -1 + 0.1 * m_offset, 0, 0.0005, 0, 1);
+	setup_data_image(data, 2, 0, +1 - 0.5 * m_offset, 0.0005, 2, 1);
+	//transfer data
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id_image);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo_id_image);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vbo_data), vbo_data, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ibo_data), ibo_data, GL_DYNAMIC_DRAW);
 }
-void Plotter::setup_data_text_2(float* vbo_data)
+
+void Plotter::setup_latex(const char* path, const char* string, unsigned index)
 {
-	//data
-	char str[5];
-	const float ps = 1 - m_offset;
-	const unsigned wf = m_font->width();
-	const unsigned hf = m_font->height();
-	//vbo data
-	const float fs = 0.05 / hf;
-	for(unsigned i = 0; i < m_marks + 2; i++)
+	//path
+	char cmd[200];
+	char path_tex[200];
+	char path_png[200];
+	char path_pdf[200];
+	std::filesystem::current_path("tex/");
+	//files
+	sprintf(path_tex, "%s.tex", path);
+	sprintf(path_pdf, "%s.pdf", path);
+	sprintf(path_png, "%s.png", path);
+	//latex
+	if(!std::filesystem::exists(path_png))
 	{
-		//string
-		float x1 = -ps;
-		float x2 = -ps + 2 * ps * i / (m_marks + 1);
-		sprintf(str, "%.2f", m_x1_min + (m_x1_max - m_x1_min) * i / (m_marks + 1));
-		//characters
-		int wt = 0, ht = 0;
-		for(unsigned j = 0; j < 4; j++)
-		{
-			//data
-			float* data = vbo_data + 64 * i + 16 * j;
-			const int w = m_font->m_chars[unsigned(str[j])].width();
-			const int h = m_font->m_chars[unsigned(str[j])].height();
-			const int x = m_font->m_chars[unsigned(str[j])].offset();
-			const int s = m_font->m_chars[unsigned(str[j])].advance();
-			const int a = m_font->m_chars[unsigned(str[j])].bearing(0);
-			const int b = m_font->m_chars[unsigned(str[j])].bearing(1);
-			//positions
-			data[4 * 0 + 0] = data[4 * 3 + 0] = x1 + fs * a;
-			data[4 * 2 + 1] = data[4 * 3 + 1] = x2 + fs * h;
-			data[4 * 1 + 0] = data[4 * 2 + 0] = x1 + fs * (a + w);
-			data[4 * 0 + 1] = data[4 * 1 + 1] = x2 + fs * (b - h);
-			//texture
-			data[4 * 0 + 3] = data[4 * 1 + 3] = float(h) / hf;
-			data[4 * 0 + 2] = data[4 * 3 + 2] = float(x) / wf;
-			data[4 * 2 + 3] = data[4 * 3 + 3] = float(0) / hf;
-			data[4 * 1 + 2] = data[4 * 2 + 2] = float(x + w) / wf;
-			//update
-			wt += s;
-			x1 += fs * s;
-			ht = std::max(h, ht);
-		}
-		for(unsigned j = 0; j < 16; j++)
-		{
-			vbo_data[64 * i + 4 * j + 1] -= fs * ht / 2;
-			vbo_data[64 * i + 4 * j + 0] -= fs * wt + m_offset / 4;
-		}
+		//file
+		FILE* file = fopen(path_tex, "w");
+		fprintf(file, "\\documentclass{standalone}\n\\begin{document}\n%s\n\\end{document}", string);
+		fclose(file);
+		//convert
+		sprintf(cmd, "pdflatex %s", path_tex); system(cmd);
+		sprintf(cmd, "convert -density 1000 %s %s", path_pdf, path_png);  system(cmd);
 	}
+	//image
+	m_images[index].path(path_png);
+	m_images[index].load();
+	//directory
+	std::filesystem::current_path("../");
 }
-void Plotter::setup_data_text_3(float* vbo_data)
+void Plotter::setup_data_image(float*& vbo_data, unsigned index, float x1, float x2, float ps, unsigned a1, unsigned a2)
 {
 	//data
-	const char str[] = "g1";
-	const float ps = 1 - m_offset;
-	const unsigned wf = m_font->width();
-	const unsigned hf = m_font->height();
-	//vbo data
-	const float fs = 0.05 / hf;
-	//string
-	float x1 = 0;
-	float x2 = 0;
-	//characters
-	int wt = 0, ht = 0;
-	for(unsigned j = 0; j < 2; j++)
+	const unsigned wt = Image::m_total_width;
+	const unsigned ht = Image::m_total_height;
+	const unsigned w = m_images[index].m_width;
+	const unsigned h = m_images[index].m_height;
+	const unsigned x = m_images[index].m_offset;
+	//position
+	vbo_data[4 * 0 + 1] = vbo_data[4 * 1 + 1] = x2;
+	vbo_data[4 * 0 + 0] = vbo_data[4 * 3 + 0] = x1;
+	vbo_data[4 * 2 + 1] = vbo_data[4 * 3 + 1] = x2 + ps * h;
+	vbo_data[4 * 1 + 0] = vbo_data[4 * 2 + 0] = x1 + ps * w;
+	//texture
+	vbo_data[4 * 0 + 2] = vbo_data[4 * 3 + 2] = float(x) / wt;
+	vbo_data[4 * 0 + 3] = vbo_data[4 * 1 + 3] = float(0) / ht;
+	vbo_data[4 * 2 + 3] = vbo_data[4 * 3 + 3] = float(h) / ht;
+	vbo_data[4 * 1 + 2] = vbo_data[4 * 2 + 2] = float(x + w) / wt;
+	//alignment
+	for(unsigned j = 0; j < 4; j++)
 	{
-		//data
-		float* data = vbo_data + 16 * j;
-		const int w = m_font->m_chars[unsigned(str[j])].width();
-		const int h = m_font->m_chars[unsigned(str[j])].height();
-		const int x = m_font->m_chars[unsigned(str[j])].offset();
-		const int s = m_font->m_chars[unsigned(str[j])].advance();
-		const int a = m_font->m_chars[unsigned(str[j])].bearing(0);
-		const int b = m_font->m_chars[unsigned(str[j])].bearing(1);
-		//positions
-		data[4 * 0 + 0] = data[4 * 3 + 0] = x1 + fs * a;
-		data[4 * 2 + 1] = data[4 * 3 + 1] = x2 + fs * h;
-		data[4 * 1 + 0] = data[4 * 2 + 0] = x1 + fs * (a + w);
-		data[4 * 0 + 1] = data[4 * 1 + 1] = x2 + fs * (b - h);
-		//texture
-		data[4 * 0 + 3] = data[4 * 1 + 3] = float(h) / hf;
-		data[4 * 0 + 2] = data[4 * 3 + 2] = float(x) / wf;
-		data[4 * 2 + 3] = data[4 * 3 + 3] = float(0) / hf;
-		data[4 * 1 + 2] = data[4 * 2 + 2] = float(x + w) / wf;
-		//update
-		wt += s;
-		x1 += fs * s;
-		ht = std::max(h, ht);
+		vbo_data[4 * j + 0] -= a1 * ps * w / 2;
+		vbo_data[4 * j + 1] -= a2 * ps * h / 2;
 	}
-	for(unsigned j = 0; j < 8; j++)
-	{
-		vbo_data[4 * j + 1] -= fs * ht / 2;
-		vbo_data[4 * j + 0] -= fs * wt + m_offset / 4;
-	}
+	//update
+	vbo_data += 16;
 }
 void Plotter::setup_data_text(float*& vbo_data, const char* string, float x1, float x2, float sf, unsigned a1, unsigned a2)
 {
@@ -397,7 +383,7 @@ void Plotter::setup_data_text(float*& vbo_data, const char* string, float x1, fl
 	//alignment
 	for(unsigned i = 0; i < nc; i++)
 	{
-		for (unsigned j = 0; j < 4; j++)
+		for(unsigned j = 0; j < 4; j++)
 		{
 			vbo_data[16 * i + 4 * j + 0] -= a1 * sf / hf * wt / 2;
 			vbo_data[16 * i + 4 * j + 1] -= a2 * sf / hf * ht / 2;
@@ -517,9 +503,25 @@ void Plotter::plot(void)
 //callbacks
 void Plotter::callback_idle(void)
 {
+	//time
 	glUseProgram(m_master->m_program_id_plot);
 	m_master->m_frame = (m_master->m_frame + 1) % m_master->m_frames;
 	glUniform1f(glGetUniformLocation(m_master->m_program_id_plot, "time"), float(m_master->m_frame) / m_master->m_frames);
+	//speed
+	char string[5];
+	float vbo_data[64];
+	float* data = vbo_data;
+	if(m_master->m_mode == 0)
+	{
+		//data
+		float t = float(m_master->m_frame) / m_master->m_frames;
+		sprintf(string, "%.2f", m_master->m_x3_min + t * (m_master->m_x3_max - m_master->m_x3_min));
+		//buffer
+		glBindBuffer(GL_ARRAY_BUFFER, m_master->m_vbo_id_text);
+		m_master->setup_data_text(data, string, 0, 1 - 0.5 * m_offset, 0.05, 0, 1);
+		glBufferSubData(GL_ARRAY_BUFFER, 128 * (m_master->m_marks + 2) * sizeof(float), 64 * sizeof(float), vbo_data);
+	}
+	//redraw
 	glutPostRedisplay();
 }
 void Plotter::callback_display(void)
@@ -541,12 +543,23 @@ void Plotter::callback_display(void)
 	//draw text
 	glUseProgram(m_master->m_program_id_text);
 	glBindVertexArray(m_master->m_vao_id_text);
-	glBindTexture(GL_TEXTURE_2D, m_master->m_texture_id);
+	glBindTexture(GL_TEXTURE_2D, m_master->m_texture_id_text);
 	glBindBuffer(GL_ARRAY_BUFFER, m_master->m_vbo_id_text);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_master->m_ibo_id_text);
 	glDrawElements(GL_TRIANGLES, 48 * (m_master->m_marks + 2) + 24, GL_UNSIGNED_INT, nullptr);
+	//draw image
+	glUseProgram(m_master->m_program_id_image);
+	glBindVertexArray(m_master->m_vao_id_image);
+	glBindTexture(GL_TEXTURE_2D, m_master->m_texture_id_image);
+	glBindBuffer(GL_ARRAY_BUFFER, m_master->m_vbo_id_image);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_master->m_ibo_id_image);
+	glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, nullptr);
 	//glut
 	glutSwapBuffers();
+	//time
+	clock_t time_new = clock();
+	printf("FPS: %ld\n", CLOCKS_PER_SEC / (time_new - m_master->m_time));
+	m_master->m_time = time_new;
 }
 void Plotter::callback_reshape(int width, int height)
 {

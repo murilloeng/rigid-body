@@ -1,4 +1,5 @@
 //std
+#include <ctime>
 #include <string>
 #include <functional>
 
@@ -8,6 +9,7 @@
 
 //rigid
 #include "rigid-body/inc/scene/Font.hpp"
+#include "rigid-body/inc/scene/Image.hpp"
 
 class Plotter
 {
@@ -21,15 +23,17 @@ public:
 	//draw
 	void setup(void);
 	void setup_data(void);
+	void setup_latex(void);
 	void setup_buffers(void);
 	void setup_freetype(void);
 	void setup_uniforms(void);
 	void setup_data_plot(void);
 	void setup_data_mark(void);
 	void setup_data_text(void);
-	void setup_data_text_1(float*);
-	void setup_data_text_2(float*);
-	void setup_data_text_3(float*);
+	void setup_data_image(void);
+
+	void setup_latex(const char*, const char*, unsigned);
+	void setup_data_image(float*&, unsigned, float, float, float, unsigned, unsigned);
 	void setup_data_text(float*&, const char*, float, float, float, unsigned, unsigned);
 
 	static void setup_shader(GLuint, GLenum, const char*);
@@ -50,19 +54,23 @@ public:
 	//data
 	bool m_grid;
 	Font* m_font;
+	clock_t m_time;
 	float m_x1_min;
 	float m_x1_max;
 	float m_x2_min;
 	float m_x2_max;
 	float m_x3_min;
 	float m_x3_max;
+	Image* m_images;
 	unsigned m_mode;
 	unsigned m_frame;
 	unsigned m_marks;
 	unsigned m_width;
 	unsigned m_height;
 	unsigned m_frames;
-	GLuint m_texture_id;
+	char m_label_1[20];
+	char m_label_2[20];
+	char m_label_3[20];
 	GLuint m_vao_id_plot;
 	GLuint m_vbo_id_plot;
 	GLuint m_ibo_id_plot;
@@ -72,10 +80,16 @@ public:
 	GLuint m_vao_id_text;
 	GLuint m_vbo_id_text;
 	GLuint m_ibo_id_text;
+	GLuint m_vao_id_image;
+	GLuint m_vbo_id_image;
+	GLuint m_ibo_id_image;
 	GLuint m_program_id_plot;
 	GLuint m_program_id_mark;
 	GLuint m_program_id_text;
+	GLuint m_program_id_image;
 	static Plotter* m_master;
+	GLuint m_texture_id_text;
+	GLuint m_texture_id_image;
 	const static float m_offset;
 	std::function<bool(double, double, double)> m_function;
 };

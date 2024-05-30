@@ -6,7 +6,6 @@
 !*.bat
 !*.cpp
 !*.hpp
-!*.json
 !*.vert
 !*.frag
 !*Makefile
