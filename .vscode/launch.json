@@ -8,11 +8,11 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/dist/debug/rigid.out",
 			"args": [],
-			"cwd": "${workspaceFolder}",
-			"stopAtEntry": false,
-			"environment": [],
-			"externalConsole": false,
 			"MIMode": "gdb",
+			"environment": [],
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"cwd": "${workspaceFolder}",
 			"setupCommands":
 			[
 				{
@@ -21,6 +21,17 @@
 					"ignoreFailures": true
 				}
 			]
+		},
+		{
+			"name": "msvc",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/dist/x64/Debug/rigid.exe",
+			"args": [],
+			"environment": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal"
 		}
 	]
 }

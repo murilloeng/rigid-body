@@ -5,7 +5,6 @@
 #include <cstring>
 
 //canvas
-#include "Canvas/inc/Windows/Glut.hpp"
 #include "Canvas/inc/Objects/Object.hpp"
 
 //rigid
@@ -154,29 +153,29 @@ math::mat3 Rigid::stiffness(void) const
 //results
 void Rigid::draw(unsigned duration) const
 {
-	//data
-	unsigned* step = new unsigned(0);
-	canvas::windows::Glut* app = new canvas::windows::Glut(0, nullptr, "../Canvas/shd/");
-	//objects
-	draw_model(app->scene());
-	app->scene()->update(true);
-	//idle
-	std::function<void(void)> callback_idle = [this, app, step, duration](void)
-	{
-		canvas::quat q;
-		q[0] = (float) m_state_data[4 * *step + 0];
-		q[1] = (float) m_state_data[4 * *step + 1];
-		q[2] = (float) m_state_data[4 * *step + 2];
-		q[3] = (float) m_state_data[4 * *step + 3];
-		for(canvas::objects::Object* object : app->scene()->objects())
-		{
-			object->model_matrix(canvas::mat4::rotation(q));
-		}
-		app->scene()->update(false);
-		*step = (*step + 1) % (m_steps + 1);
-		std::this_thread::sleep_for(std::chrono::milliseconds(duration * 1000 / m_steps));
-	};
-	app->callback_idle(callback_idle);
-	//start
-	app->start();
+	////data
+	//unsigned* step = new unsigned(0);
+	//canvas::windows::Glut* app = new canvas::windows::Glut(0, nullptr, "../Canvas/shd/");
+	////objects
+	//draw_model(app->scene());
+	//app->scene()->update(true);
+	////idle
+	//std::function<void(void)> callback_idle = [this, app, step, duration](void)
+	//{
+	//	canvas::quat q;
+	//	q[0] = (float) m_state_data[4 * *step + 0];
+	//	q[1] = (float) m_state_data[4 * *step + 1];
+	//	q[2] = (float) m_state_data[4 * *step + 2];
+	//	q[3] = (float) m_state_data[4 * *step + 3];
+	//	for(canvas::objects::Object* object : app->scene()->objects())
+	//	{
+	//		object->model_matrix(canvas::mat4::rotation(q));
+	//	}
+	//	app->scene()->update(false);
+	//	*step = (*step + 1) % (m_steps + 1);
+	//	std::this_thread::sleep_for(std::chrono::milliseconds(duration * 1000 / m_steps));
+	//};
+	//app->callback_idle(callback_idle);
+	////start
+	//app->start();
 }

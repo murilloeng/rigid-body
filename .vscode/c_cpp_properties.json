@@ -5,9 +5,8 @@
 			"name": "Win32",
 			"includePath":
 			[
-				"${workspaceFolder}",
 				"${workspaceFolder}/..",
-				"${workspaceFolder}/../Math"
+				"${workspaceFolder}/../external/cpp/inc"
 			],
 			"defines":
 			[

@@ -3,10 +3,11 @@
 !*.gp
 !*.py
 !*.md
-!*.bat
 !*.cpp
 !*.hpp
+!*.sln
 !*.vert
 !*.frag
+!*.vcxproj
 !*Makefile
 !.gitignore
