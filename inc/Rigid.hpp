@@ -8,9 +8,6 @@
 #include "Math/inc/linear/quat.hpp"
 #include "Math/inc/linear/mat3.hpp"
 
-//canvas
-#include "Canvas/inc/Scene/Scene.hpp"
-
 class Rigid
 {
 public:
@@ -30,10 +27,6 @@ public:
 	math::mat3 inertia(void) const;
 	math::mat3 damping(void) const;
 	math::mat3 stiffness(void) const;
-
-	//results
-	void draw(unsigned) const;
-	virtual void draw_model(canvas::Scene*) const = 0;
 
 	//data
 	double m_M;
