@@ -6,7 +6,7 @@
 #include "rigid-body/inc/Map.hpp"
 
 //constructor
-Map::Map(void) : m_full(false), m_mode(0), m_mesh{500, 500, 100}, m_range{0.0, 0.0, 1.5, 2.0, 2.0, 3.0}
+Map::Map(void) : m_full(false), m_mode(0), m_mesh{500, 500, 500}, m_range{0.0, 0.0, 1.5, 2.0, 2.0, 3.0}
 {
 	return;
 }
@@ -22,7 +22,12 @@ void Map::compute(void)
 {
 	//path
 	char path[200];
-	sprintf(path, "data/map-%d-%.2lf.txt", m_mode, m_state[2]);
+	if(m_full) sprintf(path, "data/map-%d-full.txt", m_mode);
+	else
+	{
+		if(m_mode == 0) sprintf(path, "data/map-%d-%.2lf.txt", m_mode, m_state[2]);
+		if(m_mode == 1 || m_mode == 2) sprintf(path, "data/map-%d-%.2lf.txt", m_mode, m_angle);
+	}
 	//file
 	FILE* file = fopen(path, "w");
 	//loop
@@ -42,6 +47,8 @@ void Map::state(uint32_t i, uint32_t j)
 {
 	m_state[0] = m_range[0] + double(i) / m_mesh[0] * (m_range[3] - m_range[0]);
 	m_state[1] = m_range[1] + double(j) / m_mesh[1] * (m_range[4] - m_range[1]);
+	if(m_mode == 1) m_state[2] = 1 / sqrt((1 - m_state[1]) * cos(M_PI * m_angle / 180));
+	if(m_mode == 2) m_state[2] = 1 / sqrt((1 - m_state[0]) * cos(M_PI * m_angle / 180));
 }
 uint32_t Map::compute_vertical(void) const
 {
@@ -112,15 +119,16 @@ uint32_t Map::compute_stability(void)
 	}
 	else
 	{
-		uint32_t v1 = 0, v2 = 0;
+		uint32_t v1 = 0, v2 = 0, counter = 0;
 		for(uint32_t i = 0; i <= m_mesh[2]; i++)
 		{
 			m_state[2] = m_range[2] + double(i) / m_mesh[2] * (m_range[5] - m_range[2]);
 			if(m_mode == 0) v2 = compute_vertical();
 			if(m_mode == 1) v2 = compute_tilted_1();
 			if(m_mode == 2) v2 = compute_tilted_2();
-			
+			if(v1 != v2) v1 = v2, counter++;
 		}
+		return counter;
 	}
 	//return
 	return 0U;

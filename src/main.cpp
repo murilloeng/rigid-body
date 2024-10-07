@@ -9,20 +9,25 @@ int main(void)
 {
 	//data
 	Map map;
-	map.m_mode = 0;
+	map.m_mode = 1;
 	map.m_mesh[0] = 500;
 	map.m_mesh[1] = 500;
+	map.m_mesh[2] = 500;
 	//compute
-	map.m_state[2] = 1.50;
+	map.m_angle = 5;
 	map.compute();
-	map.m_state[2] = 1.75;
+	map.m_angle = 15;
 	map.compute();
-	map.m_state[2] = 2.00;
+	map.m_angle = 30;
 	map.compute();
-	map.m_state[2] = 2.25;
+	map.m_angle = 45;
 	map.compute();
-	map.m_state[2] = 2.50;
+	map.m_angle = 60;
 	map.compute();
+	map.m_angle = 75;
+	map.compute();
+	// map.m_full = true;
+	// map.compute();
 	//return
 	return 0;
 }

@@ -24,7 +24,8 @@ public:
 	bool m_full;
 	uint32_t m_mode;
 	uint32_t m_mesh[3];
-	
+
+	double m_angle;
 	double m_state[3];
 	double m_range[6];
 };
