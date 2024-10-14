@@ -16,4 +16,6 @@ set palette rgbformulae -3, 0, 3
 set output sprintf("%s.pdf", file)
 set ylabel "{/Symbol g}_2" norotate
 
-splot sprintf("%s.txt", file) using ($1) : ($2) : ($3 == -1 ? NaN : $3 == 2 ? 0.5 : $3) notitle
+map(x) = x == -1 ? NaN : (x == 0 ? 0 : (x == 1 ? 1 : 0.5))
+
+splot sprintf("%s.txt", file) using ($1) : ($2) : (map($3)) notitle

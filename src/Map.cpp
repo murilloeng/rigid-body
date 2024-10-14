@@ -122,7 +122,22 @@ uint32_t Map::compute_stability(void)
 		uint32_t v1 = 0, v2 = 0, counter = 0;
 		for(uint32_t i = 0; i <= m_mesh[2]; i++)
 		{
-			m_state[2] = m_range[2] + double(i) / m_mesh[2] * (m_range[5] - m_range[2]);
+			if(m_mode == 0)
+			{
+				m_state[2] = m_range[2] + double(i) / m_mesh[2] * (m_range[5] - m_range[2]);
+			}
+			if(m_mode == 1)
+			{
+				if(i == m_mesh[2]) break;
+				m_angle = 1 + 88 * double(i) / m_mesh[2];
+				m_state[2] = 1 / sqrt((1 - m_state[1]) * cos(M_PI * m_angle / 180));
+			}
+			if(m_mode == 2)
+			{
+				if(i == m_mesh[2]) break;
+				m_angle = 1 + 88 * double(i) / m_mesh[2];
+				m_state[2] = 1 / sqrt((1 - m_state[0]) * cos(M_PI * m_angle / 180));
+			}
 			if(m_mode == 0) v2 = compute_vertical();
 			if(m_mode == 1) v2 = compute_tilted_1();
 			if(m_mode == 2) v2 = compute_tilted_2();
