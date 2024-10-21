@@ -120,6 +120,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;..\external\cpp\lib\x64\glew32.lib;..\external\cpp\lib\x64\freeglut.lib;..\external\cpp\lib\x64\freetype.lib;..\external\cpp\lib\x64\liblapack.lib;dist\$(platform)\$(configuration)\Math.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\liblapack.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgfortran-3.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgcc_s_sjlj-1.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(configuration) &gt; nul</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -139,6 +146,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;..\external\cpp\lib\x64\glew32.lib;..\external\cpp\lib\x64\freeglut.lib;..\external\cpp\lib\x64\freetype.lib;..\external\cpp\lib\x64\liblapack.lib;dist\$(platform)\$(configuration)\Math.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\liblapack.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgfortran-3.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libgcc_s_sjlj-1.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(configuration) &gt; nul</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="inc\Map.hpp" />

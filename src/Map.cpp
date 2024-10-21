@@ -80,7 +80,7 @@ uint32_t Map::compute_tilted_1(void) const
 	const double d2 = (g1 - g2) * (2 * g2 - 3) / g1 / g2 / (1 - g2);
 	const double e2 = 3 * (g1 - g2) / g1 / g2 / (1 - g2) / (1 - g2);
 	const double b2 = (1 - 2 * g1 - g2 * (1 + g1 - g2)) / g1 / g2 / (1 - g2);
-	//consditions
+	//conditions
 	const double B2 = a2 * wp * wp + b2 / wp / wp;
 	const double C2 = c2 * wp * wp * wp * wp + d2 + e2 / wp / wp / wp / wp;
 	//return

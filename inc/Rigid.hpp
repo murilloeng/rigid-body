@@ -31,8 +31,7 @@ public:
 	//data
 	double m_M;
 	double m_dt;
-	math::mat3 m_J1;
-	math::mat3 m_J2;
+	math::mat3 m_J;
 	unsigned m_step;
 	unsigned m_steps;
 	unsigned m_iteration;

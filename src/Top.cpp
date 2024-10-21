@@ -48,7 +48,7 @@ void Top::finish(void)
 	//data
 	char path[200];
 	Rigid::finish();
-	sprintf(path, "data/%s_position.dat", m_label);
+	sprintf(path, "data/%s-position.dat", m_label);
 	//write
 	FILE* file = fopen(path, "w");
 	for(unsigned j = 0; j < m_steps; j++)
@@ -69,101 +69,70 @@ double Top::reference_velocity(void) const
 	//data
 	const double m = m_M;
 	const double l = m_l;
+	const double J3 = m_J[8];
 	const double g = 9.81e+00;
-	const double J3 = m_J2[8];
 	//return
 	return sqrt(m * g * l / J3);
 }
 
-double Top::critical_velocity(void) const
+bool Top::stability_vertical(double w0) const
 {
-	//data
-	const double J1 = m_J2[0];
-	const double J2 = m_J2[4];
-	const double J3 = m_J2[8];
+	const double J1 = m_J[0];
+	const double J2 = m_J[4];
+	const double J3 = m_J[8];
 	const double g1 = J1 / J3;
 	const double g2 = J2 / J3;
 	const double wr = reference_velocity();
-	//return
-	return wr * (sqrt(g1) + sqrt(g2)) / sqrt(1 - pow(g2 - g1, 2));
+	return stability_vertical(g1, g2, w0 / wr);
 }
-double Top::critical_velocity(unsigned index) const
+bool Top::stability_vertical(double g1, double g2, double wp)
 {
 	//data
-	const double J1 = m_J2[0];
-	const double J2 = m_J2[4];
-	const double J3 = m_J2[8];
-	const double g1 = J1 / J3;
-	const double g2 = J2 / J3;
-	const double gp = index == 0 ? g2 : g1;
-	const double wr = reference_velocity();
-	//return
-	return wr / sqrt(1 - gp);
-}
-
-bool Top::stability_check(unsigned index, double tilt_angle) const
-{
-	const double J1 = m_J2[0];
-	const double J2 = m_J2[4];
-	const double J3 = m_J2[8];
-	const double g1 = J1 / J3;
-	const double g2 = J2 / J3;
-	return stability_check(index, g1, g2, tilt_angle);
-}
-bool Top::stability_check(unsigned index, double g1, double g2, double bt)
-{
-	//data
-	double a, b, c, d;
-	const double h1 = 1 - g1;
-	const double h2 = 1 - g2;
-	const double w3 = 1 / sqrt(cos(bt) * (index == 0 ? h2 : h1));
-	//parameters
-	if(index == 0)
-	{
-		a = (g2 * g2 - h1 * h1) / g1;
-		c = 2 * (1 + g2 - g1) / (g1 * g2);
-		d = -(1 + 2 * (g2 - g1)) / (g1 * g2 * h2 * h2);
-		b = (1 + g2 * g2 - g1 * g1 + g2 - g1) / (g1 * g2 * h2);
-	}
-	else
-	{
-		a = (g1 * g1 - h2 * h2) / g2;
-		c = 2 * (1 + g1 - g2) / (g1 * g2);
-		d = -(1 + 2 * (g1 - g2)) / (g1 * g2 * h1 * h1);
-		b = (1 + g1 * g1 - g2 * g2 + g1 - g2) / (g1 * g2 * h1);
-	}
-	//return
-	const double w34 = w3 * w3 * w3 * w3;
-	return 
-		(a * pow(w3, 4) + b >= 0) && (c * pow(w3, 4) + d >= 0) &&
-		(pow(a * pow(w3, 4) + b, 2) - 4 * (c * pow(w3, 4) + d) >= 0);
-}
-
-bool Top::stability_check_vertical(double w3) const
-{
-	//data
-	const double m = m_M;
-	const double l = m_l;
-	const double g = 9.81;
-	const double J1 = m_J2[0];
-	const double J2 = m_J2[4];
-	const double J3 = m_J2[8];
-	const double g1 = J1 / J3;
-	const double g2 = J2 / J3;
-	const double wr = sqrt(m * g * l / J3);
-	//return
-	return stability_check_vertical(g1, g2, w3 / wr);
-}
-bool Top::stability_check_vertical(double g1, double g2, double wp)
-{
-	//data
-	const double e = 1 / (g1 * g2);
-	const double b = (g1 + g2) / (g1 * g2);
-	const double d = (g1 + g2 - 2) / (g1 * g2);
-	const double c = (g1 * g2 - g1 - g2 + 1) / (g1 * g2);
-	const double a = (2 * g1 * g2 - g1 - g2 + 1) / (g1 * g2);
-	//return
+	const double e = 1 / g1 / g2;
+	const double b = (g1 + g2) / g1 / g2;
+	const double d = (g1 + g2 - 2) / g1 / g2;
+	const double c = (g1 * g2 - g1 - g2 + 1) / g1 / g2;
+	const double a = (2 * g1 * g2 - g1 - g2 + 1) / g1 / g2;
+	//stability
 	const double B = a * wp * wp - b;
 	const double C = c * wp * wp * wp * wp + d * wp * wp + e;
 	return abs(g1 - g2) < 1 && g1 + g2 > 1 && B > 0 && C > 0 && B * B - 4 * C > 0;
+}
+
+bool Top::stability_tilted(uint32_t index, double tilt_angle) const
+{
+	//data
+	double w0;
+	const double J1 = m_J[0];
+	const double J2 = m_J[4];
+	const double J3 = m_J[8];
+	const double g1 = J1 / J3;
+	const double g2 = J2 / J3;
+	const double wr = reference_velocity();
+	if(index == 0) w0 = wr / sqrt(cos(tilt_angle) * (1 - g2));
+	if(index == 1) w0 = wr / sqrt(cos(tilt_angle) * (1 - g1));
+	//return
+	return stability_tilted(index, g1, g2, w0 / wr);
+}
+bool Top::stability_tilted(uint32_t index, double g1, double g2, double wp) const
+{
+	//data
+	const double c2 = (g1 - g2) * (1 - g2) / g1;
+	const double c3 = (g2 - g1) * (1 - g1) / g2;
+	const double a2 = 2 - g2 * (1 + g1 - g2) / g1;
+	const double a3 = 2 - g1 * (1 + g2 - g1) / g2;
+	const double d2 = (g1 - g2) * (2 * g2 - 3) / g1 / g2 / (1 - g2);
+	const double d3 = (g2 - g1) * (2 * g1 - 3) / g2 / g1 / (1 - g1);
+	const double e2 = 3 * (g1 - g2) / g1 / g2 / (1 - g2) / (1 - g2);
+	const double e3 = 3 * (g2 - g1) / g2 / g1 / (1 - g1) / (1 - g1);
+	const double b2 = (1 - 2 * g1 - g2 * (1 + g1 - g2)) / g1 / g2 / (1 - g2);
+	const double b3 = (1 - 2 * g2 - g1 * (1 + g2 - g1)) / g2 / g1 / (1 - g1);
+	//return
+	const double B2 = a2 * wp * wp + b2 / wp / wp;
+	const double B3 = a3 * wp * wp + b3 / wp / wp;
+	const double C2 = c2 * wp * wp * wp * wp + d2 + e2 / wp / wp / wp / wp;
+	const double C3 = c3 * wp * wp * wp * wp + d3 + e3 / wp / wp / wp / wp;
+	return index == 0 ? 
+		abs(g1 - g2) < 1 && g1 + g2 > 1 && B2 > 0 && C2 > 0 && B2 * B2 - 4 * C2 > 0 : 
+		abs(g1 - g2) < 1 && g1 + g2 > 1 && B3 > 0 && C3 > 0 && B3 * B3 - 4 * C3 > 0;
 }

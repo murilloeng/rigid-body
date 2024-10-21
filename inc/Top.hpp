@@ -20,14 +20,11 @@ public:
 	//stability
 	double reference_velocity(void) const;
 
-	double critical_velocity(void) const;
-	double critical_velocity(unsigned) const;
+	bool stability_vertical(double) const;
+	static bool stability_vertical(double, double, double);
 
-	bool stability_check(unsigned, double) const;
-	static bool stability_check(unsigned, double, double, double);
-
-	bool stability_check_vertical(double) const;
-	static bool stability_check_vertical(double, double, double);
+	bool stability_tilted(uint32_t, double) const;
+	bool stability_tilted(uint32_t, double, double, double) const;
 
 	//data
 	double m_l;
