@@ -9,6 +9,8 @@ set terminal pdf
 set encoding utf8
 set format x '%.2f'
 set format y '%.2f'
+set xrange [0 : 2]
+set yrange [0 : 2]
 set cbrange [0 : 1]
 set samples 500, 500
 set lmargin at screen 0.00

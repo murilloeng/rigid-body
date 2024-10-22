@@ -6,7 +6,39 @@
 #include "rigid-body/inc/Map.hpp"
 #include "rigid-body/inc/Top.hpp"
 
-void test_vertical_symmetric(bool stability)
+static void compute_maps(uint32_t mode, bool full)
+{
+	//data
+	Map map;
+	map.m_mode = mode;
+	map.m_full = full;
+	//compute
+	if(!full)
+	{
+		if(mode == 0)
+		{
+			for(uint32_t i = 0; i < 6; i++)
+			{
+				map.m_state[2] = 1.50 + 0.25 * i;
+				map.compute();
+			}
+		}
+		else
+		{
+			for(uint32_t i = 0; i < 6; i++)
+			{
+				map.m_angle = i == 0 ? 1 : 15 * i;
+				map.compute();
+			}
+		}
+	}
+	else
+	{
+		map.compute();
+	}
+}
+
+static void test_vertical_symmetric(bool stability)
 {
 	//data
 	Top top;
@@ -35,9 +67,20 @@ void test_vertical_symmetric(bool stability)
 
 int main(void)
 {
+
 	//test
-	test_vertical_symmetric(true);
-	test_vertical_symmetric(false);
+	const uint32_t ng = 2000;
+	const uint32_t nw = 2000;
+	for(uint32_t i = 0; i <= nw; i++)
+	{
+		for(uint32_t j = 0; j <= ng; j++)
+		{
+			const double g = double(j) / ng;
+			const double w = 1.50 + 0.5 * double(i) / nw;
+			const bool s = Top::stability_vertical(g, 1 + g, w);
+			if(s) printf("%.2e %.2e %d\n", w, g, s);
+		}
+	}
 	//return
 	return 0;
 }

@@ -25,7 +25,8 @@ public:
 	uint32_t m_mode;
 	uint32_t m_mesh[3];
 
-	double m_angle;
+	uint32_t m_angle;
 	double m_state[3];
 	double m_range[6];
+	static const uint32_t m_counter_max = 10;
 };

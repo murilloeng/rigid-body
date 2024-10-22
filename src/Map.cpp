@@ -20,13 +20,17 @@ Map::~Map(void)
 //compute
 void Map::compute(void)
 {
-	//path
+	//data
 	char path[200];
-	if(m_full) sprintf(path, "data/map-%d-full.txt", m_mode);
+	//path
+	if(m_full)
+	{
+		sprintf(path, "data/maps/%d-full.txt", m_mode);
+	}
 	else
 	{
-		if(m_mode == 0) sprintf(path, "data/map-%d-%.2lf.txt", m_mode, m_state[2]);
-		if(m_mode == 1 || m_mode == 2) sprintf(path, "data/map-%d-%.2lf.txt", m_mode, m_angle);
+		if(m_mode == 0) sprintf(path, "data/maps/%d-%.2lf.txt", m_mode, m_state[2]);
+		if(m_mode == 1 || m_mode == 2) sprintf(path, "data/maps/%d-%d.txt", m_mode, m_angle);
 	}
 	//file
 	FILE* file = fopen(path, "w");
@@ -109,6 +113,8 @@ uint32_t Map::compute_stability(void)
 	//check
 	const double g1 = m_state[0];
 	const double g2 = m_state[1];
+	if(m_mode == 1 && g2 > 1) return UINT32_MAX;
+	if(m_mode == 2 && g1 > 1) return UINT32_MAX;
 	if(g1 + g2 < 1 || fabs(g2 - g1) > 1) return UINT32_MAX;
 	//compute
 	if(!m_full)
@@ -129,19 +135,20 @@ uint32_t Map::compute_stability(void)
 			if(m_mode == 1)
 			{
 				if(i == m_mesh[2]) break;
-				m_angle = 1 + 88 * double(i) / m_mesh[2];
+				m_angle = 1 + 88 * i / m_mesh[2];
 				m_state[2] = 1 / sqrt((1 - m_state[1]) * cos(M_PI * m_angle / 180));
 			}
 			if(m_mode == 2)
 			{
 				if(i == m_mesh[2]) break;
-				m_angle = 1 + 88 * double(i) / m_mesh[2];
+				m_angle = 1 + 88 * i / m_mesh[2];
 				m_state[2] = 1 / sqrt((1 - m_state[0]) * cos(M_PI * m_angle / 180));
 			}
 			if(m_mode == 0) v2 = compute_vertical();
 			if(m_mode == 1) v2 = compute_tilted_1();
 			if(m_mode == 2) v2 = compute_tilted_2();
 			if(v1 != v2) v1 = v2, counter++;
+			if(counter == m_counter_max) {counter = 0; break;}
 		}
 		return counter;
 	}
