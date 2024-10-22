@@ -67,20 +67,8 @@ static void test_vertical_symmetric(bool stability)
 
 int main(void)
 {
-
 	//test
-	const uint32_t ng = 2000;
-	const uint32_t nw = 2000;
-	for(uint32_t i = 0; i <= nw; i++)
-	{
-		for(uint32_t j = 0; j <= ng; j++)
-		{
-			const double g = double(j) / ng;
-			const double w = 1.50 + 0.5 * double(i) / nw;
-			const bool s = Top::stability_vertical(g, 1 + g, w);
-			if(s) printf("%.2e %.2e %d\n", w, g, s);
-		}
-	}
+	
 	//return
 	return 0;
 }
