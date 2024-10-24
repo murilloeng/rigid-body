@@ -90,7 +90,7 @@ void Rigid::setup(void)
 	delete[] m_acceleration_data;
 	//allocate
 	m_state_data = new double[4 * (m_steps + 1)];
-	m_energy_data = new double[1 * (m_steps + 1)];
+	m_energy_data = new double[2 * (m_steps + 1)];
 	m_velocity_data = new double[3 * (m_steps + 1)];
 	m_acceleration_data = new double[3 * (m_steps + 1)];
 }
@@ -103,14 +103,15 @@ void Rigid::record(void)
 	memcpy(m_state_data + 4 * (m_step + 1), m_state_new, 4 * sizeof(double));
 	memcpy(m_velocity_data + 3 * (m_step + 1), m_velocity_new, 3 * sizeof(double));
 	memcpy(m_acceleration_data + 3 * (m_step + 1), m_acceleration_new, 3 * sizeof(double));
-	m_energy_data[m_step + 1] = w_new.inner(m_J * w_new) / 2;
+	m_energy_data[2 * (m_step + 1) + 1] = 0;
+	m_energy_data[2 * (m_step + 1) + 0] = w_new.inner(m_J * w_new) / 2;
 }
 void Rigid::finish(void)
 {
 	//data
 	FILE* files[4];
 	char paths[4][200];
-	const unsigned size[] = {4, 1, 3, 3};
+	const unsigned size[] = {4, 2, 3, 3};
 	const char* type[] = {"state", "energy", "velocity", "acceleration"};
 	const double* data[] = {m_state_data, m_energy_data, m_velocity_data, m_acceleration_data};
 	//write

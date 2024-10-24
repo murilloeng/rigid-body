@@ -41,7 +41,9 @@ void Top::setup(void)
 void Top::record(void)
 {
 	Rigid::record();
+	const double g = 9.81;
 	math::vec3(m_position_data + 3 * (m_step + 1)) = math::quat(m_state_new).rotate({0, 0, -m_l});
+	m_energy_data[2 * (m_step + 1) + 1] = -m_M * g * (m_position_data[3 * (m_step + 1) + 2] + m_l) + m_energy_data[0];
 }
 void Top::finish(void)
 {
