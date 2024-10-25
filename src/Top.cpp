@@ -116,7 +116,7 @@ bool Top::stability_tilted(uint32_t index, double tilt_angle) const
 	//return
 	return stability_tilted(index, g1, g2, w0 / wr);
 }
-bool Top::stability_tilted(uint32_t index, double g1, double g2, double wp) const
+bool Top::stability_tilted(uint32_t index, double g1, double g2, double wp)
 {
 	//data
 	const double c2 = (g1 - g2) * (1 - g2) / g1;

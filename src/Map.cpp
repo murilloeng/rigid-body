@@ -136,13 +136,13 @@ uint32_t Map::compute_stability(void)
 			{
 				if(i == m_mesh[2]) break;
 				m_angle = 1 + 88 * i / m_mesh[2];
-				m_state[2] = 1 / sqrt((1 - m_state[1]) * cos(M_PI * m_angle / 180));
+				m_state[2] = 1 / sqrt((1 - g2) * cos(M_PI * m_angle / 180));
 			}
 			if(m_mode == 2)
 			{
 				if(i == m_mesh[2]) break;
 				m_angle = 1 + 88 * i / m_mesh[2];
-				m_state[2] = 1 / sqrt((1 - m_state[0]) * cos(M_PI * m_angle / 180));
+				m_state[2] = 1 / sqrt((1 - g1) * cos(M_PI * m_angle / 180));
 			}
 			if(m_mode == 0) v2 = compute_vertical();
 			if(m_mode == 1) v2 = compute_tilted_1();

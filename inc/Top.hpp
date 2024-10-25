@@ -24,7 +24,7 @@ public:
 	static bool stability_vertical(double, double, double);
 
 	bool stability_tilted(uint32_t, double) const;
-	bool stability_tilted(uint32_t, double, double, double) const;
+	static bool stability_tilted(uint32_t, double, double, double);
 
 	//data
 	double m_l;
