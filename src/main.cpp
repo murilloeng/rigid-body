@@ -10,8 +10,8 @@ static void compute_maps(uint32_t mode, bool full)
 {
 	//data
 	Map map;
-	map.m_mode = mode;
-	map.m_full = full;
+	map.mode(mode);
+	map.full(full);
 	//compute
 	if(!full)
 	{
@@ -19,7 +19,7 @@ static void compute_maps(uint32_t mode, bool full)
 		{
 			for(uint32_t i = 0; i < 6; i++)
 			{
-				map.m_state[2] = 1.50 + 0.25 * i;
+				map.state(2, 1.50 + 0.25 * i);
 				map.compute();
 			}
 		}
@@ -27,7 +27,7 @@ static void compute_maps(uint32_t mode, bool full)
 		{
 			for(uint32_t i = 0; i < 6; i++)
 			{
-				map.m_angle = i == 0 ? 1 : 15 * i;
+				map.angle(i == 0 ? 1 : 15 * i);
 				map.compute();
 			}
 		}

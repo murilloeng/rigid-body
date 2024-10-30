@@ -2,6 +2,9 @@
 #include <cmath>
 #include <cstdio>
 
+//ext
+#include "external/cpp/inc/GLFW/glfw3.h"
+
 //rigid body
 #include "rigid-body/inc/Map.hpp"
 
@@ -15,6 +18,61 @@ Map::Map(void) : m_full(false), m_mode(0), m_mesh{500, 500, 500}, m_range{0.0, 0
 Map::~Map(void)
 {
 	return;
+}
+
+//data
+bool Map::full(bool full)
+{
+	return m_full = full;
+}
+bool Map::full(void) const
+{
+	return m_full;
+}
+
+uint32_t Map::mode(void) const
+{
+	return m_mode;
+}
+uint32_t Map::mode(uint32_t mode)
+{
+	return m_mode = mode;
+}
+
+uint32_t Map::angle(void) const
+{
+	return m_angle;
+}
+uint32_t Map::angle(uint32_t angle)
+{
+	return m_angle = angle;
+}
+
+uint32_t Map::mesh(uint32_t index) const
+{
+	return m_mesh[index];
+}
+uint32_t Map::mesh(uint32_t index, uint32_t mesh)
+{
+	return m_mesh[index] = mesh;
+}
+
+double Map::state(uint32_t index) const
+{
+	return m_state[index];
+}
+double Map::state(uint32_t index, double state)
+{
+	return m_state[index] = state;
+}
+
+double Map::range(uint32_t index, bool boundary) const
+{
+	return m_range[3 * boundary + index];
+}
+double Map::range(uint32_t index, bool boundary, double range)
+{
+	return m_range[3 * boundary + index] = range;
 }
 
 //compute
