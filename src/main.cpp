@@ -130,6 +130,22 @@ static void test_tilted(double g1, double g2, double wp, bool axis, bool stabili
 int main(void)
 {
 	//test
+	Map map;
+	// map.full(true);
+	// map.mesh(2, 15000);
+	// map.range(2, true, 100);
+	// map.compute();
+	const double g1 = 0.75;
+	const double g2 = 1.25;
+	const uint32_t nw = 1000;
+	for(uint32_t i = 0; i <= nw; i++)
+	{
+		const double wp = 3.0 * i / nw;
+		map.state(0, g1);
+		map.state(1, g2);
+		map.state(2, wp);
+		printf("g1: %.2e g2: %.2e wp: %.2e s: %d\n", g1, g2, wp, map.compute_vertical());
+	}
 	//return
 	return 0;
 }

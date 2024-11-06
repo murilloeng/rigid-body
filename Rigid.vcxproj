@@ -158,12 +158,16 @@ copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(config
     <ClInclude Include="inc\Map.hpp" />
     <ClInclude Include="inc\Top.hpp" />
     <ClInclude Include="inc\Rigid.hpp" />
+    <ClInclude Include="inc\Union.hpp" />
+    <ClInclude Include="inc\Interval.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\Top.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Rigid.cpp" />
+    <ClCompile Include="src\Union.cpp" />
+    <ClCompile Include="src\Interval.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
