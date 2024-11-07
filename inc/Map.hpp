@@ -3,6 +3,9 @@
 //std
 #include <cstdint>
 
+//rigid-body
+#include "rigid-body/inc/Union.hpp"
+
 class Map
 {
 public:
@@ -40,6 +43,11 @@ public:
 	uint32_t compute_tilted_2(void) const;
 
 private:
+	//vertical
+	Union vertical_condition_1(void) const;
+	Union vertical_condition_2(void) const;
+	Union vertical_condition_3(void) const;
+
 	//data
 	bool m_full;
 	uint32_t m_mode;

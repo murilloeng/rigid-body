@@ -213,3 +213,96 @@ uint32_t Map::compute_stability(void)
 	//return
 	return 0U;
 }
+
+//vertical
+Union Map::vertical_condition_1(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double b = (g1 + g2) / g1 / g2;
+	const double a = (2 * g1 * g2 - g1 - g2 + 1) / g1 / g2;
+	//union
+	if(a < 0)
+	{
+		ur.m_intervals.push_back(Interval(0, b < 0 ? sqrt(b / a) : 0));
+	}
+	else
+	{
+		ur.m_intervals.push_back(Interval(b > 0 ? sqrt(b / a) : 0, HUGE_VAL));
+	}
+	//return
+	return ur;
+}
+Union Map::vertical_condition_2(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double e = 1 / g1 / g2;
+	const double d = (g1 + g2 - 2) / g1 / g2;
+	const double c = (g1 * g2 - g1 - g2 + 1) / g1 / g2;
+	//return
+	if(d * d - 4 * c * e < 0)
+	{
+		if(c > 0) ur.m_intervals.push_back(Interval(0, HUGE_VAL));
+	}
+	else
+	{
+		const double s1 = -d / 2 / c - sqrt(d * d - 4 * c * e) / 2 / c;
+		const double s2 = -d / 2 / c + sqrt(d * d - 4 * c * e) / 2 / c;
+		if(c > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, s1 > 0 ? sqrt(s1) : 0));
+			ur.m_intervals.push_back(Interval(s2 > 0 ? sqrt(s2) : 0, HUGE_VAL));
+		}
+		else
+		{
+			ur.m_intervals.push_back(s1 < 0 ? Interval(0, 0) : Interval(s2 > 0 ? sqrt(s2) : 0, sqrt(s1)));
+		}
+	}
+	//return
+	return ur;
+}
+Union Map::vertical_condition_3(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double e = 1 / g1 / g2;
+	const double b = (g1 + g2) / g1 / g2;
+	const double d = (g1 + g2 - 2) / g1 / g2;
+	const double c = (g1 * g2 - g1 - g2 + 1) / g1 / g2;
+	const double a = (2 * g1 * g2 - g1 - g2 + 1) / g1 / g2;
+	//data
+	const double am = a * a - 4 * c;
+	const double cm = b * b - 4 * e;
+	const double bm = -2 * a * b - 4 * d;
+	//union
+	if(bm * bm - 4 * am * cm < 0)
+	{
+		if(am > 0) ur.m_intervals.push_back(Interval(0, HUGE_VAL));
+	}
+	else
+	{
+		const double s1 = -bm / 2 / am - sqrt(bm * bm - 4 * am * cm) / 2 / am;
+		const double s2 = -bm / 2 / am + sqrt(bm * bm - 4 * am * cm) / 2 / am;
+		if(am > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, s1 > 0 ? sqrt(s1) : 0));
+			ur.m_intervals.push_back(Interval(s2 > 0 ? sqrt(s2) : 0, HUGE_VAL));
+		}
+		else
+		{
+			ur.m_intervals.push_back(s1 < 0 ? Interval(0, 0) : Interval(s2 > 0 ? sqrt(s2) : 0, sqrt(s1)));
+		}
+	}
+	//return
+	return ur;
+}

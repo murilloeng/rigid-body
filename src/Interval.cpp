@@ -34,7 +34,7 @@ Interval Interval::fusion(const Interval& interval) const
 }
 Interval Interval::intersection(const Interval& interval) const
 {
-	const double i_min = std::max(m_min, interval.m_min);
-	const double i_max = std::min(m_max, interval.m_max);
-	return is_empty() || interval.is_empty() ? Interval(0, 0) : Interval(i_min, i_max);
+	const double min = std::max(m_min, interval.m_min);
+	const double max = std::min(m_max, interval.m_max);
+	return is_empty() || interval.is_empty() ? Interval(0, 0) : Interval(min, max);
 }
