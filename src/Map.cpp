@@ -183,38 +183,53 @@ uint32_t Map::compute_stability(void)
 	}
 	else
 	{
-		uint32_t v1 = 0, v2 = 0, counter = 0;
-		for(uint32_t i = 0; i <= m_mesh[2]; i++)
-		{
-			if(m_mode == 0)
-			{
-				m_state[2] = m_range[2] + double(i) / m_mesh[2] * (m_range[5] - m_range[2]);
-			}
-			if(m_mode == 1)
-			{
-				if(i == m_mesh[2]) break;
-				m_angle = 1 + 88 * i / m_mesh[2];
-				m_state[2] = 1 / sqrt((1 - g2) * cos(M_PI * m_angle / 180));
-			}
-			if(m_mode == 2)
-			{
-				if(i == m_mesh[2]) break;
-				m_angle = 1 + 88 * i / m_mesh[2];
-				m_state[2] = 1 / sqrt((1 - g1) * cos(M_PI * m_angle / 180));
-			}
-			if(m_mode == 0) v2 = compute_vertical();
-			if(m_mode == 1) v2 = compute_tilted_1();
-			if(m_mode == 2) v2 = compute_tilted_2();
-			if(v1 != v2) v1 = v2, counter++;
-			if(counter == m_counter_max) {counter = 0; break;}
-		}
-		return counter;
+		if(m_mode == 0) return vertical_full();
+		// uint32_t v1 = 0, v2 = 0, counter = 0;
+		// for(uint32_t i = 0; i <= m_mesh[2]; i++)
+		// {
+		// 	if(m_mode == 0)
+		// 	{
+		// 		m_state[2] = m_range[2] + double(i) / m_mesh[2] * (m_range[5] - m_range[2]);
+		// 	}
+		// 	if(m_mode == 1)
+		// 	{
+		// 		if(i == m_mesh[2]) break;
+		// 		m_angle = 1 + 88 * i / m_mesh[2];
+		// 		m_state[2] = 1 / sqrt((1 - g2) * cos(M_PI * m_angle / 180));
+		// 	}
+		// 	if(m_mode == 2)
+		// 	{
+		// 		if(i == m_mesh[2]) break;
+		// 		m_angle = 1 + 88 * i / m_mesh[2];
+		// 		m_state[2] = 1 / sqrt((1 - g1) * cos(M_PI * m_angle / 180));
+		// 	}
+		// 	if(m_mode == 0) v2 = compute_vertical();
+		// 	if(m_mode == 1) v2 = compute_tilted_1();
+		// 	if(m_mode == 2) v2 = compute_tilted_2();
+		// 	if(v1 != v2) v1 = v2, counter++;
+		// 	if(counter == m_counter_max) {counter = 0; break;}
+		// }
+		// return counter;
 	}
 	//return
 	return 0U;
 }
 
 //vertical
+uint32_t Map::vertical_full(void) const
+{
+	//data
+	const Union u1 = vertical_condition_1();
+	const Union u2 = vertical_condition_2();
+	const Union u3 = vertical_condition_3();
+	Union ur = u1.intersection(u2.intersection(u3));
+	//return
+	ur.trim_empty();
+	ur.trim_fusion();
+	return ur.m_intervals.size() == 0 ? 0 : 
+		ur.m_intervals.size() == 1 && ur.m_intervals[0].m_max == HUGE_VAL ? 1 : 
+		ur.m_intervals.size() == 1 && ur.m_intervals[0].m_max != HUGE_VAL ? 2 : 3;
+}
 Union Map::vertical_condition_1(void) const
 {
 	//data

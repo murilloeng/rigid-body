@@ -22,13 +22,13 @@ set ylabel "{/Symbol g}_2" norotate
 map(x) = x == -1 ? NaN : x
 
 if(file eq '0-full') {
-	set label '(0)' at 1.125, 0.375 front center
-	set label '(0)' at 0.375, 1.125 front center
-	set label '(1)' at 0.425, 0.750 front center
-	set label '(1)' at 0.750, 0.425 front center
-	set label '(1)' at 1.250, 1.250 front center
-	set label '(2)' at 1.250, 0.750 front center
-	set label '(2)' at 0.750, 1.250 front center
+	set label '(0)' at 1.200, 0.425 front center
+	set label '(0)' at 0.425, 1.200 front center
+	set label '(1)' at 0.425, 0.800 front center
+	set label '(1)' at 0.800, 0.425 front center
+	set label '(1)' at 1.500, 1.500 front center
+	set label '(2)' at 1.400, 0.825 front center
+	set label '(2)' at 0.825, 1.400 front center
 	set label '(3)' at 0.750, 0.750 front center
 } else {
 	if(file eq '1-full') {

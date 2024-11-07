@@ -44,6 +44,7 @@ public:
 
 private:
 	//vertical
+	uint32_t vertical_full(void) const;
 	Union vertical_condition_1(void) const;
 	Union vertical_condition_2(void) const;
 	Union vertical_condition_3(void) const;
