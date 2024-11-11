@@ -42,12 +42,24 @@ public:
 	uint32_t compute_tilted_1(void) const;
 	uint32_t compute_tilted_2(void) const;
 
-private:
+//private:
 	//vertical
 	uint32_t vertical_full(void) const;
 	Union vertical_condition_1(void) const;
 	Union vertical_condition_2(void) const;
 	Union vertical_condition_3(void) const;
+
+	//tilted 1
+	uint32_t tilted_1_full(void) const;
+	Union tilted_1_condition_1(void) const;
+	Union tilted_1_condition_2(void) const;
+	Union tilted_1_condition_3(void) const;
+
+	//tilted 2
+	uint32_t tilted_2_full(void) const;
+	Union tilted_2_condition_1(void) const;
+	Union tilted_2_condition_2(void) const;
+	Union tilted_2_condition_3(void) const;
 
 	//data
 	bool m_full;

@@ -175,41 +175,17 @@ uint32_t Map::compute_stability(void)
 	if(m_mode == 2 && g1 > 1) return UINT32_MAX;
 	if(g1 + g2 < 1 || fabs(g2 - g1) > 1) return UINT32_MAX;
 	//compute
-	if(!m_full)
+	if(m_full)
+	{
+		if(m_mode == 0) return vertical_full();
+		if(m_mode == 1) return tilted_1_full();
+		if(m_mode == 2) return tilted_2_full();
+	}
+	else
 	{
 		if(m_mode == 0) return compute_vertical();
 		if(m_mode == 1) return compute_tilted_1();
 		if(m_mode == 2) return compute_tilted_2();
-	}
-	else
-	{
-		if(m_mode == 0) return vertical_full();
-		// uint32_t v1 = 0, v2 = 0, counter = 0;
-		// for(uint32_t i = 0; i <= m_mesh[2]; i++)
-		// {
-		// 	if(m_mode == 0)
-		// 	{
-		// 		m_state[2] = m_range[2] + double(i) / m_mesh[2] * (m_range[5] - m_range[2]);
-		// 	}
-		// 	if(m_mode == 1)
-		// 	{
-		// 		if(i == m_mesh[2]) break;
-		// 		m_angle = 1 + 88 * i / m_mesh[2];
-		// 		m_state[2] = 1 / sqrt((1 - g2) * cos(M_PI * m_angle / 180));
-		// 	}
-		// 	if(m_mode == 2)
-		// 	{
-		// 		if(i == m_mesh[2]) break;
-		// 		m_angle = 1 + 88 * i / m_mesh[2];
-		// 		m_state[2] = 1 / sqrt((1 - g1) * cos(M_PI * m_angle / 180));
-		// 	}
-		// 	if(m_mode == 0) v2 = compute_vertical();
-		// 	if(m_mode == 1) v2 = compute_tilted_1();
-		// 	if(m_mode == 2) v2 = compute_tilted_2();
-		// 	if(v1 != v2) v1 = v2, counter++;
-		// 	if(counter == m_counter_max) {counter = 0; break;}
-		// }
-		// return counter;
 	}
 	//return
 	return 0U;
@@ -316,6 +292,244 @@ Union Map::vertical_condition_3(void) const
 		else
 		{
 			ur.m_intervals.push_back(s1 < 0 ? Interval(0, 0) : Interval(s2 > 0 ? sqrt(s2) : 0, sqrt(s1)));
+		}
+	}
+	//return
+	return ur;
+}
+
+//tilted 1
+uint32_t Map::tilted_1_full(void) const
+{
+	//data
+	const double g2 = m_state[1];
+	const double w2 = 1 / sqrt(1 - g2);
+	const Union u1 = tilted_1_condition_1();
+	const Union u2 = tilted_1_condition_2();
+	const Union u3 = tilted_1_condition_3();
+	Union ur = u1.intersection(u2.intersection(u3)).intersection(Interval(w2, HUGE_VAL));
+	//return
+	ur.trim_empty();
+	ur.trim_fusion();
+	return ur.m_intervals.size() == 0 ? 0 : 
+		ur.m_intervals.size() == 1 && ur.m_intervals[0].m_max == HUGE_VAL ? 1 : 
+		ur.m_intervals.size() == 1 && ur.m_intervals[0].m_max != HUGE_VAL ? 2 : 3;
+}
+Union Map::tilted_1_condition_1(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double a = 2 - g2 * (1 + g1 - g2) / g1;
+	const double b = (1 - 2 * g1 - g2 * (1 + g1 - g2)) / g1 / g2 / (1 - g2);
+	//union
+	if(a < 0)
+	{
+		ur.m_intervals.push_back(Interval(0, b < 0 ? 0 : pow(-b / a, 0.25)));
+	}
+	else
+	{
+		ur.m_intervals.push_back(Interval(b > 0 ? 0 : pow(-b / a, 0.25), HUGE_VAL));
+	}
+	//return
+	return ur;
+}
+Union Map::tilted_1_condition_2(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double c = (g1 - g2) * (1 - g2) / g1;
+	const double d = (g1 - g2) * (2 * g2 - 3) / g1 / g2 / (1 - g2);
+	const double e = 3 * (g1 - g2) / g1 / g2 / (1 - g2) / (1 - g2);
+	//union
+	if(d * d - 4 * c * e < 0)
+	{
+		if(c > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, HUGE_VAL));
+		}
+	}
+	else
+	{
+		const double s1 = -d / 2 / c - sqrt(d * d - 4 * c * e) / 2 / c;
+		const double s2 = -d / 2 / c + sqrt(d * d - 4 * c * e) / 2 / c;
+		const double w1 = s1 > 0 ? pow(s1, 0.25) : 0;
+		const double w2 = s2 > 0 ? pow(s2, 0.25) : 0;
+		if(c > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, w1));
+			ur.m_intervals.push_back(Interval(w2, HUGE_VAL));
+		}
+		else
+		{
+			ur.m_intervals.push_back(Interval(w2, w1));
+		}
+	}
+	//return
+	return ur;
+}
+Union Map::tilted_1_condition_3(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double c = (g1 - g2) * (1 - g2) / g1;
+	const double a = 2 - g2 * (1 + g1 - g2) / g1;
+	const double d = (g1 - g2) * (2 * g2 - 3) / g1 / g2 / (1 - g2);
+	const double e = 3 * (g1 - g2) / g1 / g2 / (1 - g2) / (1 - g2);
+	const double b = (1 - 2 * g1 - g2 * (1 + g1 - g2)) / g1 / g2 / (1 - g2);
+	//data
+	const double am = a * a - 4 * c;
+	const double cm = b * b - 4 * e;
+	const double bm = 2 * a * b - 4 * d;
+	//union
+	if(bm * bm - 4 * am * cm < 0)
+	{
+		if(am > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, HUGE_VAL));
+		}
+	}
+	else
+	{
+		const double s1 = -bm / 2 / am - sqrt(bm * bm - 4 * am * cm) / 2 / am;
+		const double s2 = -bm / 2 / am + sqrt(bm * bm - 4 * am * cm) / 2 / am;
+		const double w1 = s1 > 0 ? pow(s1, 0.25) : 0;
+		const double w2 = s2 > 0 ? pow(s2, 0.25) : 0;
+		if(am > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, w1));
+			ur.m_intervals.push_back(Interval(w2, HUGE_VAL));
+		}
+		else
+		{
+			ur.m_intervals.push_back(Interval(w2, w1));
+		}
+	}
+	//return
+	return ur;
+}
+
+//tilted 2
+uint32_t Map::tilted_2_full(void) const
+{
+	//data
+	const double g1 = m_state[0];
+	const double w1 = 1 / sqrt(1 - g1);
+	const Union u1 = tilted_2_condition_1();
+	const Union u2 = tilted_2_condition_2();
+	const Union u3 = tilted_2_condition_3();
+	Union ur = u1.intersection(u2.intersection(u3)).intersection(Interval(w1, HUGE_VAL));
+	//return
+	ur.trim_empty();
+	ur.trim_fusion();
+	return ur.m_intervals.size() == 0 ? 0 : 
+		ur.m_intervals.size() == 1 && ur.m_intervals[0].m_max == HUGE_VAL ? 1 : 
+		ur.m_intervals.size() == 1 && ur.m_intervals[0].m_max != HUGE_VAL ? 2 : 3;
+}
+Union Map::tilted_2_condition_1(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double a = 2 - g1 * (1 + g2 - g1) / g2;
+	const double b = (1 - 2 * g2 - g1 * (1 + g2 - g1)) / g2 / g1 / (1 - g1);
+	//union
+	if(a < 0)
+	{
+		ur.m_intervals.push_back(Interval(0, b < 0 ? 0 : pow(-b / a, 0.25)));
+	}
+	else
+	{
+		ur.m_intervals.push_back(Interval(b > 0 ? 0 : pow(-b / a, 0.25), HUGE_VAL));
+	}
+	//return
+	return ur;
+}
+Union Map::tilted_2_condition_2(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double c = (g2 - g1) * (1 - g1) / g2;
+	const double d = (g2 - g1) * (2 * g1 - 3) / g2 / g1 / (1 - g1);
+	const double e = 3 * (g2 - g1) / g2 / g1 / (1 - g1) / (1 - g1);
+	//union
+	if(d * d - 4 * c * e < 0)
+	{
+		if(c > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, HUGE_VAL));
+		}
+	}
+	else
+	{
+		const double s1 = -d / 2 / c - sqrt(d * d - 4 * c * e) / 2 / c;
+		const double s2 = -d / 2 / c + sqrt(d * d - 4 * c * e) / 2 / c;
+		const double w1 = s1 > 0 ? pow(s1, 0.25) : 0;
+		const double w2 = s2 > 0 ? pow(s2, 0.25) : 0;
+		if(c > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, w1));
+			ur.m_intervals.push_back(Interval(w2, HUGE_VAL));
+		}
+		else
+		{
+			ur.m_intervals.push_back(Interval(w2, w1));
+		}
+	}
+	//return
+	return ur;
+}
+Union Map::tilted_2_condition_3(void) const
+{
+	//data
+	Union ur;
+	const double g1 = m_state[0];
+	const double g2 = m_state[1];
+	//data
+	const double c = (g2 - g1) * (1 - g1) / g2;
+	const double a = 2 - g1 * (1 + g2 - g1) / g2;
+	const double d = (g2 - g1) * (2 * g1 - 3) / g2 / g1 / (1 - g1);
+	const double e = 3 * (g2 - g1) / g2 / g1 / (1 - g1) / (1 - g1);
+	const double b = (1 - 2 * g2 - g1 * (1 + g2 - g1)) / g2 / g1 / (1 - g1);
+	//data
+	const double am = a * a - 4 * c;
+	const double cm = b * b - 4 * e;
+	const double bm = 2 * a * b - 4 * d;
+	//union
+	if(bm * bm - 4 * am * cm < 0)
+	{
+		if(am > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, HUGE_VAL));
+		}
+	}
+	else
+	{
+		const double s1 = -bm / 2 / am - sqrt(bm * bm - 4 * am * cm) / 2 / am;
+		const double s2 = -bm / 2 / am + sqrt(bm * bm - 4 * am * cm) / 2 / am;
+		const double w1 = s1 > 0 ? pow(s1, 0.25) : 0;
+		const double w2 = s2 > 0 ? pow(s2, 0.25) : 0;
+		if(am > 0)
+		{
+			ur.m_intervals.push_back(Interval(0, w1));
+			ur.m_intervals.push_back(Interval(w2, HUGE_VAL));
+		}
+		else
+		{
+			ur.m_intervals.push_back(Interval(w2, w1));
 		}
 	}
 	//return

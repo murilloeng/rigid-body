@@ -22,7 +22,7 @@ Interval::~Interval(void)
 
 bool Interval::is_empty(void) const
 {
-	return m_min >= m_max;
+	return m_min >= m_max || abs(m_min - m_max) < 1e-5 * std::max(abs(m_min), abs(m_max));
 }
 Interval Interval::fusion(const Interval& interval) const
 {
