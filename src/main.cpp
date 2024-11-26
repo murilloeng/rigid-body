@@ -5,6 +5,7 @@
 //rigid-body
 #include "rigid-body/inc/Map.hpp"
 #include "rigid-body/inc/Top.hpp"
+#include "rigid-body/inc/scenes.hpp"
 
 static void compute_maps(uint32_t mode, bool full)
 {
@@ -127,13 +128,13 @@ static void test_tilted(double g1, double g2, double wp, bool axis, bool stabili
 	top.finish();
 }
 
-int main(void)
+int main(int argc, char** argv)
 {
 	//test
-	Map map;
+	/*Map map;
 	map.mode(0);
 	map.full(true);
-	map.compute();
+	map.compute();*/
 	//return
 	return 0;
 }

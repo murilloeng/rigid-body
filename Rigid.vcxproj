@@ -118,10 +118,13 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\external\cpp\lib\x64\liblapack.lib;dist\$(platform)\$(configuration)\Math.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;..\external\cpp\lib\x64\glew32.lib;..\external\cpp\lib\x64\glfw3dll.lib;..\external\cpp\lib\x64\freetype.lib;..\external\cpp\lib\x64\liblapack.lib;dist\$(platform)\$(configuration)\Math.lib;dist\$(platform)\$(configuration)\Canvas.lib;dist\$(platform)\$(configuration)\Managers.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+      <Command>copy ..\external\cpp\dll\$(platform)\glfw3.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\glew32.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\freetype.dll dist\$(platform)\$(configuration) &gt; nul
 copy ..\external\cpp\dll\$(platform)\liblapack.dll dist\$(platform)\$(configuration) &gt; nul
 copy ..\external\cpp\dll\$(platform)\libgfortran-3.dll dist\$(platform)\$(configuration) &gt; nul
 copy ..\external\cpp\dll\$(platform)\libgcc_s_sjlj-1.dll dist\$(platform)\$(configuration) &gt; nul
@@ -144,10 +147,13 @@ copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(config
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\external\cpp\lib\x64\liblapack.lib;dist\$(platform)\$(configuration)\Math.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;..\external\cpp\lib\x64\glew32.lib;..\external\cpp\lib\x64\glfw3dll.lib;..\external\cpp\lib\x64\freetype.lib;..\external\cpp\lib\x64\liblapack.lib;dist\$(platform)\$(configuration)\Math.lib;dist\$(platform)\$(configuration)\Canvas.lib;dist\$(platform)\$(configuration)\Managers.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+      <Command>copy ..\external\cpp\dll\$(platform)\glfw3.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\libblas.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\glew32.dll dist\$(platform)\$(configuration) &gt; nul
+copy ..\external\cpp\dll\$(platform)\freetype.dll dist\$(platform)\$(configuration) &gt; nul
 copy ..\external\cpp\dll\$(platform)\liblapack.dll dist\$(platform)\$(configuration) &gt; nul
 copy ..\external\cpp\dll\$(platform)\libgfortran-3.dll dist\$(platform)\$(configuration) &gt; nul
 copy ..\external\cpp\dll\$(platform)\libgcc_s_sjlj-1.dll dist\$(platform)\$(configuration) &gt; nul
@@ -159,10 +165,12 @@ copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(config
     <ClInclude Include="inc\Top.hpp" />
     <ClInclude Include="inc\Rigid.hpp" />
     <ClInclude Include="inc\Union.hpp" />
+    <ClInclude Include="inc\scenes.hpp" />
     <ClInclude Include="inc\Interval.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Map.cpp" />
+    <ClCompile Include="src\scenes.cpp" />
     <ClCompile Include="src\Top.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Rigid.cpp" />
