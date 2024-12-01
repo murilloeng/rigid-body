@@ -3,15 +3,15 @@
 #include <cstdlib>
 
 //canvas
-#include "Canvas/inc/Scene/Scene.hpp"
-#include "Canvas/inc/Light/Lights.hpp"
-#include "Canvas/inc/Light/Ambient.hpp"
-#include "Canvas/inc/Objects/1D/Arc.hpp"
-#include "Canvas/inc/Light/Direction.hpp"
-#include "Canvas/inc/Objects/1D/Line.hpp"
-#include "Canvas/inc/Objects/1D/Arrow.hpp"
-#include "Canvas/inc/Objects/3D/Cylinder.hpp"
-#include "Canvas/inc/Objects/Image/Latex.hpp"
+#include "Canvas/Canvas/inc/Scene/Scene.hpp"
+#include "Canvas/Canvas/inc/Light/Lights.hpp"
+#include "Canvas/Canvas/inc/Light/Ambient.hpp"
+#include "Canvas/Canvas/inc/Objects/1D/Arc.hpp"
+#include "Canvas/Canvas/inc/Light/Direction.hpp"
+#include "Canvas/Canvas/inc/Objects/1D/Line.hpp"
+#include "Canvas/Canvas/inc/Objects/1D/Arrow.hpp"
+#include "Canvas/Canvas/inc/Objects/3D/Cylinder.hpp"
+#include "Canvas/Canvas/inc/Objects/Image/Latex.hpp"
 
 //managers
 #include "Canvas/Managers/inc/GLFW.hpp"
@@ -218,7 +218,7 @@ static void scene_setup(canvas::Scene* scene)
 void scene_motion(int argc, char** argv)
 {
 	//data
-	canvas::managers::GLFW app(argc, argv, "../Canvas/shd/");
+	canvas::managers::GLFW app(argc, argv, "../Canvas/Canvas/shd/");
 	//scene
 	scene_setup(app.scene());
 	canvas::Scene* scene = app.scene();

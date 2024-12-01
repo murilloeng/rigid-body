@@ -5,7 +5,7 @@
 #include <cstring>
 
 //canvas
-#include "Canvas/inc/Objects/Object.hpp"
+#include "Canvas/Canvas/inc/Objects/Object.hpp"
 
 //rigid
 #include "rigid-body/inc/Rigid.hpp"
