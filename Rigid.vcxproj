@@ -172,12 +172,13 @@ copy ..\external\cpp\dll\$(platform)\libquadmath-0.dll dist\$(platform)\$(config
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Map.cpp" />
-    <ClCompile Include="src\scenes.cpp" />
     <ClCompile Include="src\Top.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Rigid.cpp" />
     <ClCompile Include="src\Union.cpp" />
     <ClCompile Include="src\Interval.cpp" />
+    <ClCompile Include="src\scene_motion_1.cpp" />
+    <ClCompile Include="src\scene_motion_2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

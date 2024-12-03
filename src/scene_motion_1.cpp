@@ -19,72 +19,58 @@
 //rigid-body
 #include "rigid-body/inc/scenes.hpp"
 
-//data
-static const float a = 1.00;
-static const float b = 0.50;
-static const uint32_t nc = 40;
-static canvas::objects::Line* axes[3];
-static canvas::objects::Arrow* arrows[3];
-static canvas::objects::Cylinder* cylinders[nc];
-
 //scene
 static void scene_axes(canvas::Scene* scene)
 {
 	//data
-	axes[0] = new canvas::objects::Line;
-	axes[1] = new canvas::objects::Line;
-	axes[2] = new canvas::objects::Line;
-	//axes
-	axes[0]->color_stroke({0, 0, 0});
-	axes[1]->color_stroke({0, 0, 0});
-	axes[2]->color_stroke({0, 0, 0});
-	axes[0]->point(0, {-0.5f, +0.0f, +0.0f});
-	axes[1]->point(0, {+0.0f, -0.5f, +0.0f});
-	axes[2]->point(0, {+0.0f, +0.0f, -0.2f});
-	axes[0]->point(1, {+1.0f, +0.0f, +0.0f});
-	axes[1]->point(1, {+0.0f, +1.0f, +0.0f});
-	axes[2]->point(1, {+0.0f, +0.0f, +1.0f});
-	//scene
-	for(uint32_t i = 0; i < 3; i++)
-	{
-		scene->add_object(axes[i]);
-	}
-}
-static void scene_arrows(canvas::Scene* scene)
-{
-	//data
-	arrows[0] = new canvas::objects::Arrow;
-	arrows[1] = new canvas::objects::Arrow;
-	arrows[2] = new canvas::objects::Arrow;
+	canvas::objects::Line* axes_1 = new canvas::objects::Line;
+	canvas::objects::Line* axes_2 = new canvas::objects::Line;
+	canvas::objects::Line* axes_3 = new canvas::objects::Line;
+	canvas::objects::Arrow* arrows_1 = new canvas::objects::Arrow;
+	canvas::objects::Arrow* arrows_2 = new canvas::objects::Arrow;
+	canvas::objects::Arrow* arrows_3 = new canvas::objects::Arrow;
 	//arrows
-	arrows[0]->width(0.05f);
-	arrows[1]->width(0.05f);
-	arrows[2]->width(0.05f);
-	arrows[0]->height(0.05f);
-	arrows[1]->height(0.05f);
-	arrows[2]->height(0.05f);
-	arrows[0]->path(axes[0]);
-	arrows[1]->path(axes[1]);
-	arrows[2]->path(axes[2]);
-	arrows[0]->parameter(1.0f);
-	arrows[1]->parameter(1.0f);
-	arrows[2]->parameter(1.0f);
-	arrows[0]->color_stroke({0, 0, 0});
-	arrows[1]->color_stroke({0, 0, 0});
-	arrows[2]->color_stroke({0, 0, 0});
+	arrows_1->width(0.05f);
+	arrows_2->width(0.05f);
+	arrows_3->width(0.05f);
+	arrows_1->height(0.05f);
+	arrows_2->height(0.05f);
+	arrows_3->height(0.05f);
+	arrows_1->path(axes_1);
+	arrows_2->path(axes_2);
+	arrows_3->path(axes_3);
+	arrows_1->parameter(1.0f);
+	arrows_2->parameter(1.0f);
+	arrows_3->parameter(1.0f);
+	arrows_1->color_stroke({0, 0, 0});
+	arrows_2->color_stroke({0, 0, 0});
+	arrows_3->color_stroke({0, 0, 0});
+	//axes
+	axes_1->color_stroke({0, 0, 0});
+	axes_2->color_stroke({0, 0, 0});
+	axes_3->color_stroke({0, 0, 0});
+	axes_1->point(0, {-0.5f, +0.0f, +0.0f});
+	axes_2->point(0, {+0.0f, -0.5f, +0.0f});
+	axes_3->point(0, {+0.0f, +0.0f, -0.2f});
+	axes_1->point(1, {+1.0f, +0.0f, +0.0f});
+	axes_2->point(1, {+0.0f, +1.0f, +0.0f});
+	axes_3->point(1, {+0.0f, +0.0f, +1.0f});
 	//scene
-	for(uint32_t i = 0; i < 3; i++)
-	{
-		scene->add_object(arrows[i]);
-	}
+	scene->add_object(axes_1);
+	scene->add_object(axes_2);
+	scene->add_object(axes_3);
+	scene->add_object(arrows_1);
+	scene->add_object(arrows_2);
+	scene->add_object(arrows_3);
 }
 static void scene_cylinders(canvas::Scene* scene)
 {
 	//data
-	for(uint32_t i = 0; i < nc; i++)
-	{
-		cylinders[i] = new canvas::objects::Cylinder;
-	}
+	const float a = 1.00;
+	const float b = 0.50;
+	const uint32_t nc = 40;
+	canvas::objects::Cylinder* cylinders[nc];
+	for(uint32_t i = 0; i < nc; i++) cylinders[i] = new canvas::objects::Cylinder;
 	//cylinders
 	for(uint32_t i = 0; i < nc; i++)
 	{
@@ -209,13 +195,12 @@ static void scene_setup(canvas::Scene* scene)
 	scene->light().update_shaders();
 	//objects
 	scene_axes(scene);
-	scene_arrows(scene);
 	scene_labels(scene);
 	scene_cylinders(scene);
 	scene_tilted_axis(scene);
 }
 
-void scene_motion(int argc, char** argv)
+void scene_motion_1(int argc, char** argv)
 {
 	//data
 	canvas::managers::GLFW app(argc, argv, "../Canvas/Canvas/shd/");

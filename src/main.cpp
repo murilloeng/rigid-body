@@ -135,7 +135,7 @@ int main(int argc, char** argv)
 	map.mode(0);
 	map.full(true);
 	map.compute();*/
-	scene_motion(argc, argv);
+	scene_motion_2(argc, argv);
 	//return
 	return 0;
 }
